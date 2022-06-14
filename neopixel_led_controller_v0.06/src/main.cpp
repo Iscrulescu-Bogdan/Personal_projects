@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <Wire.h>
 
   // ____ librari incluse 
   //  #include <LiquidCrystal_I2C.h> // Librarie LCD i2c
@@ -46,7 +47,7 @@
   // ____ prototipuri functi
  
   //input de la taste
-  char taste (void) ;
+  void taste (void) ;
   //afisarea meniului de setari 
   int meniu (void) ;
   // functia pentru schimbarea  jocurilor de lumini
@@ -116,7 +117,7 @@
 
 
 
-      char taste (void) 
+      void taste (void) 
   {
          
           
