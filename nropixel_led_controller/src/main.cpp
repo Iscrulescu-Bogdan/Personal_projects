@@ -1,8 +1,10 @@
+#include <Arduino.h>
+
   // ____ librari incluse 
   //  #include <LiquidCrystal_I2C.h> // Librarie LCD i2c
   #include <LiquidCrystal.h>      // Livrarie LDC simplu
   #include <Adafruit_NeoPixel.h> // Librarie Banda NeoPixel
-
+  
   // definiti pentru functi 
   //#define VAR_ASTEAPTA unsigned long int
 
@@ -19,37 +21,46 @@
   #endif
   #define PIN 12  //definim pinul de comanda pt neopixel
   #define NUMPIXELS      108  // definim  numarul de pixeli
-    
+  #define on 1
+  #define off 0
+  
   // stabilim numele benzi de leduri
   Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
   // ____ variabile globale
   int32_t culoare = 0  ; // culoare // ******in caz de eroare punem unsigned long*****8
-  int lumina = 255 ;// sabilim luminozitatea pixelilor
+  int lumina = 55 ;// sabilim luminozitatea pixelilor
   int saturatie = 255 ; // saturatia culori
   int led_pos = 0 ; // pozitia ledului aprins
-  int led_fill = 53 ; // cate leduri sunt umplute dupa led pos
+  int led_fill = 54 ; // cate leduri sunt umplute dupa led pos
   int viteza = 1; // stabilim o variabila pt viteza
   int intarziere = 100 ; // stabilim o variabila pt delay 
   //
-  int jocPos=0; // variabila pt selectare jocuri
-  int optiuni_disponibile [] = {0,1,2,3,4,5,6,7} ; // numarul total de setari disponibile !!! se va modifica de fiecare data cand creem o setare !!!
-  int nr_optiuni_alocat ;  // numarul de setari alocate de joc 
+  int jocPos=1; // variabila pt selectare jocuri
+  int op_disp [11] ; 
+  int nr_optiuni_alocat = 11 ;  // numarul de setari alocate de joc 
   char* NumeJoc; // stabilim o variabila pentru numele jocului actual
-  const int nrJocuri = 3 ; // Stabilim numarul de jocuri pe care le avem !!! se va modifica de fiecare data cand creem un joc !!!
+  const int nrJocuri = 4 ; // Stabilim numarul de jocuri pe care le avem !!! se va modifica de fiecare data cand creem un joc !!!
   int multiplu =1; // variabila creata pt a modifica mai usor setarile 
-  int sel_seting = 0; // variabila pentru selectarea si afisarea setari
+  int sel_settings = 0; // variabila pentru selectarea si afisarea setari
   
   // ____ prototipuri functi
  
   //input de la taste
-  int taste (void) ;
+  char taste (void) ;
   //afisarea meniului de setari 
   int meniu (void) ;
   // functia pentru schimbarea  jocurilor de lumini
   void jocuri (int select);
   // functie asteapta
   //int asteapta (int timp , unsigned long previousMillis ) ;
+  
+  //functie control leduri---culoare---saturatie----luminozitate---pozitie led --- led fill
+  //necesara pentru a simplifica scrierea jocurilor pt ambele parti ale benzi de leduri
+  void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , unsigned fil ) ; 
+  void set_setting_available (int od1, int od2, int od3, int od4, int od5, int od6, int od7, int od8, int od9, int od10);
 
+
+  int var_taste = 0 ;
 
 
   void setup()
@@ -72,8 +83,6 @@
     lcd.clear();
     lcd.setCursor (5,0);
     lcd.print ("Welcome!"); 
-    lcd.setCursor (0,1);
-    lcd.print ("Controler Vs 1.0");
     delay(2000);
     lcd.clear();
 
@@ -81,52 +90,162 @@
   
   void loop() 
     {
-     
+
      
     jocuri(jocPos); // incepem cu primul joc
     
-    unsigned long timp_curent_meniu = millis();
+    unsigned long timp_curent_meniu = millis();  // creem o functie de delay care nu blocheaza procesorul 
     static unsigned long delay_meniu ; 
-    if (timp_curent_meniu - delay_meniu >= 80 )
+    if (timp_curent_meniu - delay_meniu >= 100 )  // avem nevoie de delay pt taste si lcd clear
         {
-        meniu();
+        taste();
+        
         delay_meniu = timp_curent_meniu;
         }
-  
+    else 
+    {
+      var_taste = 0 ;
     }
 
-  int taste (void) 
-        {
+   meniu ();
+    }
 
-         int val_tasta = analogRead (0);
 
-            
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+      char taste (void) 
+  {
+         
+          
+         int val_tasta = analogRead (0);  
+
+     
          if      (val_tasta < 60)  
              {
-              return 1 ; // Dreapta
+                 var_taste = 1  ;
+              
+               // Dreapta
              }
          else if (val_tasta < 200)  
              {
-              return 2 ;// Sus
+
+                 var_taste = 2 ;
+                
+              // Sus
              }
          else if (val_tasta < 400) 
              {
-              return 3 ; // Jos
+                 var_taste = 3 ;
+                
+              // Jos
              }
          else if (val_tasta < 600)   
              {
-              return 4 ; // Stanga
+                 var_taste = 4 ;
+
+              // Stanga
              }
          else if (val_tasta < 800)  
              {
-              return 5 ; // Select
+ 
+                 var_taste = 5 ;
+                
+               // Select
              }
          else                       
              {
-              return 0 ; // Stare initiala
+              var_taste = 0 ; 
+              // Stare initiala
              }
-            
+       
+  }    
+ 
+
+
+//----------------------------------------------------------------------------------------
+  
+
+/*  // exemplu folosire functie asteapta 
+*   
+*    VAR_ASTEAPTA variabila ; 
+*    if (asteapta (interval , variabila ))
+*       {variabila=asteapta ( interval ,variabila);  
+*       
+*       // aici scri ce vrei sa faca la un interval de timp  
+*
+*       }
+*/    
+ // int asteapta ( int timp , unsigned long previousMillis  ) 
+ // {
+ //    //static unsigned long previousMillis ;
+ //   unsigned long currentMillis = millis();
+ // if (currentMillis - previousMillis >= timp )
+ //     {
+  //    previousMillis = currentMillis;
+  //    return previousMillis ;
+ //    }
+ //     else return 0 ;
+       
+ // }
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , unsigned fil ) 
+    { 
+     pixels.clear();
+
+     // conditionam pozitia ledurilor aprinse pentru a crea o singura bucla
+     // in cazul in care se ajuge la capat , o sa continue de la inceput , creen fenomenul de cerc
+     if ( led_fill + led_pos > (NUMPIXELS/2) )
+        {  
+        pixels.fill( pixels.ColorHSV(col , sat , lux ) , pos , (NUMPIXELS/2) - pos);
+        pixels.fill( pixels.ColorHSV(col , sat , lux ) , 0 , fil-((NUMPIXELS/2)-pos)); 
         }
+     else
+        {
+        pixels.fill( pixels.ColorHSV(col , sat , lux ) , pos , fil); 
+        }
+        
+     if ( led_fill + led_pos > (NUMPIXELS/2) )
+        {
+        pixels.fill( pixels.ColorHSV(col , sat , lux) , pos + (NUMPIXELS/2) , (NUMPIXELS/2) - pos);
+        pixels.fill( pixels.ColorHSV(col , sat , lux ) , (NUMPIXELS/2) , fil-((NUMPIXELS/2)-pos)); 
+        }
+     else
+        {
+        pixels.fill( pixels.ColorHSV(col , sat , lux ) , pos +(NUMPIXELS/2) , fil);
+        }
+
+    pixels.show(); 
+    } 
+          
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  void set_setting_available (int od1, int od2, int od3, int od4, int od5, int od6, int od7, int od8, int od9, int od10)
+      {
+      op_disp [0] = on ;  
+      op_disp [1] = od1;
+      op_disp [2] = od2;
+      op_disp [3] = od3;
+      op_disp [4] = od4;
+      op_disp [5] = od5;
+      op_disp [6] = od6;
+      op_disp [7] = od7;
+      op_disp [8] = od8;
+      op_disp [9] = od9;
+      op_disp [10] = od10;
+      }
+
+
+
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
 
   /* optiunile disponibile sunt
    * 0 - joc // nu este modificabila
@@ -137,123 +256,142 @@
    * 5 - nr of led fill after led pos
    * 6 - viteza
    * 7 - intarziere
-   * 
+   * 8 -
+   * 9 - 
+   * 10-
    */
-  
 
-  
-  
-  
   void jocuri (int select)
   {
-
+    
   switch (select)
      {
-//======================================================//
-     case 0 :
-     nr_optiuni_alocat = 6 ; 
-     //optiuni_disponibile [0] = 0; este alocata automat si nu se va modifica 
-     optiuni_disponibile [1] = 1;
-     optiuni_disponibile [2] = 2;
-     optiuni_disponibile [3] = 3;
-     optiuni_disponibile [4] = 4;
-     optiuni_disponibile [5] = 5;
+     case 0:
+     //--------------------- 1    2    3    4    5    6    7   8    9    10    
+     set_setting_available (off, off, off, off, off, off, off, on, off ,off);
      
-     pixels.clear();
+     NumeJoc = "Setting" ;
 
-   
-        
-     pixels.fill( pixels.ColorHSV(culoare , saturatie , lumina ) , led_pos , led_fill);
-     pixels.fill( pixels.ColorHSV(culoare , saturatie , lumina ) , led_pos +54 , led_fill+54);
-    
-     pixels.show(); 
+     break;
+//======================================================//
+     case 1 :
+     //--------------------- 1   2   3   4   5   6   7   8    9    10 
+     set_setting_available (on, on, on, on, on, on, on, on, off ,off);
+     
+     bandaLed (culoare , saturatie , lumina , led_pos , led_fill) ; 
+
      NumeJoc = "Jocu1" ;
      break;
 //======================================================//     
-     case 1 :
-     nr_optiuni_alocat = 6 ;
-     optiuni_disponibile [1] = 2;
-     optiuni_disponibile [2] = 3;
-     optiuni_disponibile [3] = 4;
-     optiuni_disponibile [4] = 5;
-     optiuni_disponibile [5] = 6;
-
-     while (select == 1 )
-        {
-        culoare += viteza ;
-        break;
-        }    
+     case 2 :
+     //--------------------- 1    2    3    4   5   6   7   8    9    10 
+     set_setting_available (off, off, off, on, on, on, on, on, off ,off);
      
-     pixels.clear();
-  
-     pixels.fill( pixels.ColorHSV(culoare , saturatie , lumina ) , led_pos , led_fill);
-     pixels.fill( pixels.ColorHSV(culoare , saturatie , lumina ) , led_pos +54 , led_fill+54);
-    
-     pixels.show(); 
+     culoare += viteza ;
+         if ( culoare > 65536 )
+         {
+          culoare = 0 ; 
+         }
+     else if ( culoare < 0 )
+         {
+          culoare = 65536 ;  
+         }
+
+           
+     bandaLed (culoare , saturatie , lumina , led_pos , led_fill) ;
+     
      NumeJoc = "Jocu2" ;
      break;
 //======================================================//     
-     case 2 :
-     nr_optiuni_alocat =2 ;
-     optiuni_disponibile [0] = 0;
-     optiuni_disponibile [1] = 2;
-
+     case 3 :
+     //--------------------- 1   2   3   4   5   6   7   8    9    10 
+     set_setting_available (on, on, on, on, on, off, off, off, off ,off);
+         
+     bandaLed (culoare , saturatie , lumina , led_pos , led_fill) ;
      
-     pixels.clear();
-  
-     pixels.fill( pixels.ColorHSV(culoare , saturatie , lumina ) , led_pos , led_fill);
-     pixels.fill( pixels.ColorHSV(culoare , saturatie , lumina ) , led_pos +54 , led_fill+54);
-    
-     pixels.show(); 
      NumeJoc = "Jocu3" ; 
      break;
-//======================================================//   
+//======================================================// 
+
+
+
+  
      }
   
   
+  }
 
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
-  return 0 ;
-  }   
-
+  
   int meniu (void)
   {
-      lcd.clear();
+//  lcd.setCursor(0,1);
+//  lcd.print (var_taste);
 
-  if ( taste() == 3 ) 
+  if( var_taste != 0 )
+  {
+    lcd.clear(); // de verificat , are un mic bug 
+  }
+  
+      
+  int last_sel_settings = sel_settings ;
+  
+  if ( var_taste == 3 ) 
       {
-      if (sel_seting  < nr_optiuni_alocat-1)
+      if (sel_settings  < nr_optiuni_alocat-1)
           {
-          sel_seting  ++ ;
+          sel_settings  ++ ;
+
+          while (op_disp [sel_settings ] == off )
+              {
+              sel_settings  ++ ;
+              if (sel_settings == nr_optiuni_alocat-1 && op_disp [sel_settings ] == off) 
+                  {
+                  sel_settings = last_sel_settings ;
+                  break ;
+                  }
+              }         
 
           }
       }
-      else if (taste() == 2)
+      
+  else if (var_taste == 2)
       {
-      if(sel_seting  >0 ) 
+      if(sel_settings  >0 ) 
           {
-          sel_seting  -- ; 
+          sel_settings  -- ;
+           
+          while (op_disp [sel_settings ] == off )
+              {
+              sel_settings  -- ;
+              if (sel_settings == 0 && op_disp [sel_settings ] == off) 
+                  {
+                  sel_settings = last_sel_settings ;
+                  break ;
+                  }
+              }
           }
        
       } 
     
-  switch ( optiuni_disponibile[sel_seting ]) 
+  switch (sel_settings) 
     {
 //======================================================//  
     case 0 :
     
       lcd.setCursor (0, 0);
-      lcd.print("Joc:") ;
+      if (jocPos !=0 ) lcd.print("Joc:") ;
       lcd.setCursor (4, 0);
       lcd.print (NumeJoc) ;
 
       // citire taste   
-      if (taste() == 1) 
+      if (var_taste == 1) 
           {
           if(jocPos<nrJocuri) jocPos++ ; // in cazul in care nu depasim nr de jocuri , trecem la urmatorul 
           }
-      else if (taste() == 4)
+      else if (var_taste == 4)
           {
           if (jocPos>0) jocPos-- ;
           } 
@@ -269,7 +407,7 @@
       lcd.print("+");
       lcd.print (multiplu);
       
-      if (taste() == 1) 
+      if (var_taste == 1) 
           {
             if(culoare+multiplu <= 65535)
                 {
@@ -280,7 +418,7 @@
                 culoare = culoare - 65536 + multiplu ;
                 }
           }
-      else if (taste() == 4)
+      else if (var_taste == 4)
          {
           if (culoare-multiplu >= 0) // in cazul in care nu depasim val minima a culori  , scadem valoarea 
               {
@@ -291,7 +429,7 @@
               culoare =culoare + 65536 - multiplu ;
               }
           }
-      else if (taste() == 5)
+      else if (var_taste == 5)
           {
           if (multiplu<10000)
               {
@@ -314,7 +452,7 @@
       lcd.print (multiplu);
 
         
-      if (taste() == 1) 
+      if (var_taste == 1) 
           {
             if(lumina+multiplu <= 255)
                 {
@@ -326,7 +464,7 @@
                 lcd.print ("over val");
                 }
           }
-      else if (taste() == 4)
+      else if (var_taste == 4)
          {
           if (lumina-multiplu >= 0) // in cazul in care nu depasim val minima a culori  , scadem valoarea 
               {
@@ -339,7 +477,7 @@
               }
           
           }
-      else if (taste() == 5)
+      else if (var_taste == 5)
           {
           if (multiplu<100)
               {
@@ -362,7 +500,7 @@
       lcd.print (multiplu);
       
         
-      if (taste() == 1) 
+      if (var_taste == 1) 
           {
             if(saturatie+multiplu <= 255)
                 {
@@ -374,7 +512,7 @@
                 lcd.print ("over val");
                 }
           }
-      else if (taste() == 4)
+      else if (var_taste == 4)
          {
           if (saturatie - multiplu >= 0) // in cazul in care nu depasim val minima a culori  , scadem valoarea 
               {
@@ -387,7 +525,7 @@
               }
           
           }
-      else if (taste() == 5)
+      else if (var_taste == 5)
           {
           if (multiplu<100)
               {
@@ -414,7 +552,7 @@
       //    led_pos = 53 ; 
           
         
-      if (taste() == 1) 
+      if (var_taste == 1) 
           {
             if(led_pos+multiplu <= 53)
                 {
@@ -425,7 +563,7 @@
                 led_pos =led_pos - 54 + multiplu ; 
                 }
           }
-      else if (taste() == 4)
+      else if (var_taste == 4)
          {
           if (led_pos-multiplu >= 0) // in cazul in care nu depasim val minima a culori  , scadem valoarea 
               {
@@ -437,7 +575,7 @@
               }
           
           }
-      else if (taste() == 5)
+      else if (var_taste == 5)
           {
           if (multiplu<10)
               {
@@ -460,11 +598,11 @@
       lcd.print (multiplu);
 
         
-      if (taste() == 1) 
+      if (var_taste == 1) 
           {
-            if(lumina+multiplu <= 255)
+            if(led_fill+multiplu <= 54)
                 {
-                lumina += multiplu ; // in cazul in care nu depasim val maxima a culori  , ridicam valoarea 
+                led_fill += multiplu ; // in cazul in care nu depasim val maxima a culori  , ridicam valoarea 
                 }
             else                     
                 {
@@ -472,11 +610,11 @@
                 lcd.print ("over val");
                 }
           }
-      else if (taste() == 4)
+      else if (var_taste == 4)
          {
-          if (lumina-multiplu >= 0) // in cazul in care nu depasim val minima a culori  , scadem valoarea 
+          if (led_fill-multiplu > 0) // in cazul in care nu depasim val minima a culori  , scadem valoarea 
               {
-              lumina -= multiplu ;
+              led_fill -= multiplu ;
               }
           else
               {
@@ -485,9 +623,9 @@
               }
           
           }
-      else if (taste() == 5)
+      else if (var_taste == 5)
           {
-          if (multiplu<100)
+          if (multiplu<10)
               {
               multiplu *= 10 ; 
               }
@@ -510,34 +648,18 @@
       lcd.print (multiplu);
 
         
-      if (taste() == 1) 
+      if (var_taste == 1) 
           {
-            if(lumina+multiplu <= 255)
-                {
-                lumina += multiplu ; // in cazul in care nu depasim val maxima a culori  , ridicam valoarea 
-                }
-            else                     
-                {
-                lcd.setCursor(0,1);
-                lcd.print ("over val");
-                }
+          viteza += multiplu ; 
           }
-      else if (taste() == 4)
+      else if (var_taste == 4)
          {
-          if (lumina-multiplu >= 0) // in cazul in care nu depasim val minima a culori  , scadem valoarea 
-              {
-              lumina -= multiplu ;
-              }
-          else
-              {
-              lcd.setCursor(0,1);
-              lcd.print ("over val");
-              }
+          viteza -= multiplu ;
           
           }
-      else if (taste() == 5)
+      else if (var_taste == 5)
           {
-          if (multiplu<100)
+          if (multiplu<10000)
               {
               multiplu *= 10 ; 
               }
@@ -558,7 +680,7 @@
       lcd.print (multiplu);
 
         
-      if (taste() == 1) 
+      if (var_taste == 1) 
           {
             if(lumina+multiplu <= 255)
                 {
@@ -570,7 +692,7 @@
                 lcd.print ("over val");
                 }
           }
-      else if (taste() == 4)
+      else if (var_taste == 4)
          {
           if (lumina-multiplu >= 0) // in cazul in care nu depasim val minima a culori  , scadem valoarea 
               {
@@ -583,7 +705,7 @@
               }
           
           }
-      else if (taste() == 5)
+      else if (var_taste == 5)
           {
           if (multiplu<100)
               {
@@ -595,7 +717,45 @@
               }
           }
     break ;
+
+
  
+//======================================================//
+    case 8 :
+      static int var_about ;
+
+      if (var_taste == 1 && var_about < 3) 
+          {
+          var_about ++ ; 
+          }
+      else if (var_taste == 4 && var_about > 0 )
+         {
+          var_about -- ;
+          
+          }
+       
+      
+      lcd.setCursor (0, 0);
+      if(var_about == 1 )
+          lcd.print("Last modify on:");
+      else if (var_about == 2 )
+          lcd.print("Last modify at:");
+      else if (var_about == 3 )
+          lcd.print("Curent version:");
+      else           
+          lcd.print("ABOUT CONTROLLER") ; 
+
+      lcd.setCursor (0,1);
+      if(var_about == 1 )
+          lcd.print(__DATE__);    
+      else if (var_about == 2 )
+          lcd.print(__TIME__);
+      else if (var_about == 3)
+          lcd.print("    v0.3.04");
+      else           
+          lcd.print("Pres + or  -" ) ;
+
+    break ;
 //======================================================//
    
     default :
@@ -611,4 +771,4 @@
 
 
  return 0 ; 
-}  
+}
