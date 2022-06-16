@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <Wire.h>
-
   // ____ librari incluse 
   //  #include <LiquidCrystal_I2C.h> // Librarie LCD i2c
   #include <LiquidCrystal.h>      // Livrarie LDC simplu
@@ -62,7 +61,13 @@
 
 
   int var_taste = 0 ;
+  int lang_sell = 0 ;
 
+  char* lang_setting [2][9] { { "Limba:" ,  "Romana" ,  "SETARI",  "ultima modif in:",  "ultima modif la:",   "Despre controler",  "Versiune curenta:",  "v0.07",  "Apasa + sau -"  },
+                              {"Language:",     "English",  "SETTING",  "Last modify on:", "Last modify at:",    "About controler",  "Curent version:",   "v0.07",  "Pres + or  -"  } };
+                   
+  char* lang_menu[2][9] {"Joc:",  "Culoare:",  "Stralucire:",  "Saturatie:",  "Pozitia:",  "Umple:",  "Viteza:", "Intarziere:",  "val depasita",
+                         "Game:", "Color:",    "Brightes:",     "Saturation:", "Position:", "Fill:",   "Speed:",  "Delay:" ,     "over value" }; 
 
   void setup()
     {
@@ -95,13 +100,13 @@
      
     jocuri(jocPos); // incepem cu primul joc
     
-    unsigned long timp_curent_meniu = millis();  // creem o functie de delay care nu blocheaza procesorul 
-    static unsigned long delay_meniu ; 
-    if (timp_curent_meniu - delay_meniu >= 100 )  // avem nevoie de delay pt taste si lcd clear
+    unsigned long timp_curent_tasta = millis();  // creem o functie de delay care nu blocheaza procesorul 
+    static unsigned long delay_tasta ; 
+    if (timp_curent_tasta - delay_tasta >= 100 )  // avem nevoie de delay pt taste si lcd clear
         {
         taste();
         
-        delay_meniu = timp_curent_meniu;
+        delay_tasta = timp_curent_tasta;
         }
     else 
     {
@@ -112,8 +117,15 @@
     }
 
 
-//-------------------------------------------------------------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+    //___________________________________________________________________________________________________________________________________________________________
+    //___________________________________________________________________________________________________________________________________________________________
 
 
 
@@ -165,35 +177,7 @@
   }    
  
 
-
 //----------------------------------------------------------------------------------------
-  
-
-/*  // exemplu folosire functie asteapta 
-*   
-*    VAR_ASTEAPTA variabila ; 
-*    if (asteapta (interval , variabila ))
-*       {variabila=asteapta ( interval ,variabila);  
-*       
-*       // aici scri ce vrei sa faca la un interval de timp  
-*
-*       }
-*/    
- // int asteapta ( int timp , unsigned long previousMillis  ) 
- // {
- //    //static unsigned long previousMillis ;
- //   unsigned long currentMillis = millis();
- // if (currentMillis - previousMillis >= timp )
- //     {
-  //    previousMillis = currentMillis;
-  //    return previousMillis ;
- //    }
- //     else return 0 ;
-       
- // }
-
-//-------------------------------------------------------------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , unsigned fil ) 
     { 
@@ -224,8 +208,7 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
     pixels.show(); 
     } 
           
-//-------------------------------------------------------------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------
 
   void set_setting_available (int od1, int od2, int od3, int od4, int od5, int od6, int od7, int od8, int od9, int od10)
       {
@@ -245,8 +228,9 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
 
 
 
-//-------------------------------------------------------------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------
+
 
   /* optiunile disponibile sunt
    * 0 - joc // nu este modificabila
@@ -269,15 +253,15 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
      {
      case 0:
      //--------------------- 1    2    3    4    5    6    7   8    9    10    
-     set_setting_available (off, off, off, off, off, off, off, on, off ,off);
+     set_setting_available (off, off, off, off, off, off, off, on, on ,off);
      
-     NumeJoc = "Setting" ;
+     NumeJoc = lang_setting [lang_sell][2];
 
      break;
 //======================================================//
      case 1 :
      //--------------------- 1   2   3   4   5   6   7   8    9    10 
-     set_setting_available (on, on, on, on, on, on, on, on, off ,off);
+     set_setting_available (on, on, on, on, on, on, on, off, off ,off);
      
      bandaLed (culoare , saturatie , lumina , led_pos , led_fill) ; 
 
@@ -322,20 +306,24 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
   
   }
 
-//-------------------------------------------------------------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------
+  
   
   int meniu (void)
   {
-//  lcd.setCursor(0,1);
-//  lcd.print (var_taste);
 
-  if( var_taste != 0 )
-  {
-    lcd.clear(); // de verificat , are un mic bug 
-  }
-  
+    unsigned long timp_curent_meniu = millis();  // creem o functie de delay care nu blocheaza procesorul 
+    static unsigned long delay_meniu ; 
+    if (timp_curent_meniu - delay_meniu >= 100 )  // avem nevoie de delay pt taste si lcd clear
+        {
+        lcd.clear();
+        
+        delay_meniu = timp_curent_meniu;
+        }
+
       
   int last_sel_settings = sel_settings ;
   
@@ -383,8 +371,7 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
     case 0 :
     
       lcd.setCursor (0, 0);
-      if (jocPos !=0 ) lcd.print("Joc:") ;
-      lcd.setCursor (4, 0);
+      if (jocPos !=0 ) lcd.print(lang_menu[lang_sell][0]) ;
       lcd.print (NumeJoc) ;
 
       // citire taste   
@@ -402,7 +389,7 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
     case 1 :
     
       lcd.setCursor (0, 0);
-      lcd.print("Culoare:");
+      lcd.print(lang_menu[lang_sell][1]);
       lcd.print (culoare) ;
       lcd.setCursor (10,1);
       lcd.print("+");
@@ -446,7 +433,7 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
 //======================================================//    
     case 2 :
       lcd.setCursor (0, 0);
-      lcd.print("lumina:") ;
+      lcd.print(lang_menu[lang_sell][2]) ;
       lcd.print(lumina) ;
       lcd.setCursor (10,1);
       lcd.print("+");
@@ -462,7 +449,7 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
             else                     
                 {
                 lcd.setCursor(0,1);
-                lcd.print ("over val");
+                lcd.print (lang_menu[lang_sell][8]);
                 }
           }
       else if (var_taste == 4)
@@ -474,7 +461,7 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
           else
               {
               lcd.setCursor(0,1);
-              lcd.print ("over val");
+              lcd.print (lang_menu[lang_sell][8]);
               }
           
           }
@@ -494,7 +481,7 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
 //======================================================//    
     case 3 :
       lcd.setCursor (0, 0);
-      lcd.print("Saturatie:") ;
+      lcd.print(lang_menu[lang_sell][3]) ;
       lcd.print(saturatie) ;  
       lcd.setCursor (10,1);
       lcd.print("+");
@@ -510,7 +497,7 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
             else                     
                 {
                 lcd.setCursor(0,1);
-                lcd.print ("over val");
+                lcd.print (lang_menu[lang_sell][8]);
                 }
           }
       else if (var_taste == 4)
@@ -522,7 +509,7 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
           else
               {
               lcd.setCursor(0,1);
-              lcd.print ("over val");
+              lcd.print (lang_menu[lang_sell][8]);
               }
           
           }
@@ -541,16 +528,12 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
 //======================================================//   
     case 4 :
       lcd.setCursor (0, 0);
-      lcd.print("Pozitie:") ;
+      lcd.print(lang_menu[lang_sell][4]) ;
       lcd.print(led_pos) ;
       lcd.setCursor (10,1);
       lcd.print("+");
       lcd.print (multiplu);
 
-     // if (led_pos > 53)
-        //  led_pos = 0 ;
-     // else if (led_pos < 0)
-      //    led_pos = 53 ; 
           
         
       if (var_taste == 1) 
@@ -592,7 +575,7 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
 //======================================================//  
     case 5 :
       lcd.setCursor (0, 0);
-      lcd.print("Umple:") ;
+      lcd.print(lang_menu[lang_sell][5]) ;
       lcd.print(led_fill) ;
       lcd.setCursor (10,1);
       lcd.print("+");
@@ -608,7 +591,7 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
             else                     
                 {
                 lcd.setCursor(0,1);
-                lcd.print ("over val");
+                lcd.print (lang_menu[lang_sell][8]);
                 }
           }
       else if (var_taste == 4)
@@ -620,7 +603,7 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
           else
               {
               lcd.setCursor(0,1);
-              lcd.print ("over val");
+              lcd.print (lang_menu[lang_sell][8]);
               }
           
           }
@@ -642,7 +625,7 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
 
     case 6 :
       lcd.setCursor (0, 0);
-      lcd.print("Viteza:") ;
+      lcd.print(lang_menu[lang_sell][6]) ;
       lcd.print(viteza) ;
       lcd.setCursor (10,1);
       lcd.print("+");
@@ -674,7 +657,7 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
 //======================================================//
     case 7 :
       lcd.setCursor (0, 0);
-      lcd.print("Intarziere:") ;
+      lcd.print(lang_menu[lang_sell][7]) ;
       lcd.print(intarziere) ;
       lcd.setCursor (10,1);
       lcd.print("+");
@@ -690,7 +673,7 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
             else                     
                 {
                 lcd.setCursor(0,1);
-                lcd.print ("over val");
+                lcd.print (lang_menu[lang_sell][8]);
                 }
           }
       else if (var_taste == 4)
@@ -702,7 +685,7 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
           else
               {
               lcd.setCursor(0,1);
-              lcd.print ("over val");
+              lcd.print (lang_menu[lang_sell][8]);
               }
           
           }
@@ -719,10 +702,28 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
           }
     break ;
 
-
- 
 //======================================================//
     case 8 :
+      lcd.setCursor (0, 0);
+      lcd.print(lang_setting [lang_sell][0] ) ;
+      lcd.setCursor (0,1);
+      lcd.print(lang_setting [lang_sell][1] ) ;
+
+        
+      if (var_taste == 1 && lang_sell < 1) 
+          {
+          lang_sell ++ ;
+          }
+      else if (var_taste == 4 && lang_sell > 0)
+         {
+          lang_sell -- ;
+          }
+
+
+    break ;
+ 
+//======================================================//
+    case 9 :
       static int var_about ;
 
       if (var_taste == 1 && var_about < 3) 
@@ -738,13 +739,13 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
       
       lcd.setCursor (0, 0);
       if(var_about == 1 )
-          lcd.print("Last modify on:");
+          lcd.print(lang_setting [lang_sell][3]);
       else if (var_about == 2 )
-          lcd.print("Last modify at:");
+          lcd.print(lang_setting [lang_sell][4]);
       else if (var_about == 3 )
-          lcd.print("Curent version:");
+          lcd.print(lang_setting [lang_sell][6]);
       else           
-          lcd.print("ABOUT CONTROLLER") ; 
+          lcd.print(lang_setting [lang_sell][5]) ; 
 
       lcd.setCursor (0,1);
       if(var_about == 1 )
@@ -752,9 +753,9 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
       else if (var_about == 2 )
           lcd.print(__TIME__);
       else if (var_about == 3)
-          lcd.print("    v0.3.04");
+          lcd.print(lang_setting [lang_sell][7]);
       else           
-          lcd.print("Pres + or  -" ) ;
+          lcd.print(lang_setting [lang_sell][8]) ;
 
     break ;
 //======================================================//
@@ -774,4 +775,8 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
  return 0 ; 
 }
 
-// coment
+
+
+
+//-----------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------
