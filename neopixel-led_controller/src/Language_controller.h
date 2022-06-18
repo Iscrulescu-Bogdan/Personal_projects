@@ -19,3 +19,6 @@ char* text_umple[2] = {(char*)"Umple:", (char*)"Fill:"};
 char* text_viteza[2] = {(char*)"Viteza:", (char*)"Speed:"};
 char* text_inatzie[2] = {(char*)"Intarziere:", (char*)"Delay:"};
 char* text_dep[2] = {(char*)"val depasita", (char*)"over value" };
+
+
+

@@ -95,3 +95,5 @@ void set_setting_available (int od1, int od2, int od3, int od4, int od5, int od6
     op_disp [9] = od9;
     op_disp [10] = od10;
 }
+
+

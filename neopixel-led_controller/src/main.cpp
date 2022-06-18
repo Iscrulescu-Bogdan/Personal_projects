@@ -198,6 +198,7 @@ int meniu (void)
 
     unsigned long timp_curent_meniu = millis();  // creem o functie de delay care nu blocheaza procesorul 
     static unsigned long delay_meniu ; 
+
     if (timp_curent_meniu - delay_meniu >= 100 )  // avem nevoie de delay pt taste si lcd clear
     {
         lcd.clear();
@@ -214,9 +215,10 @@ int meniu (void)
         {
             sel_settings  ++ ;
 
-             while (op_disp [sel_settings ] == off )
+            while (op_disp [sel_settings ] == off )
             {
-                 sel_settings  ++ ;
+                sel_settings  ++ ;
+
                 if (sel_settings == nr_optiuni_alocat-1 && op_disp [sel_settings ] == off) 
                 {
                     sel_settings = last_sel_settings ;
@@ -227,7 +229,7 @@ int meniu (void)
         }
     }
       
-  else if (var_taste == 2)
+    else if (var_taste == 2)
     {
         if(sel_settings  >0 ) 
         {
@@ -245,6 +247,7 @@ int meniu (void)
         }
        
     } 
+    
     
     switch (sel_settings) 
     {
@@ -269,6 +272,7 @@ int meniu (void)
             } 
           
         break;
+
    
         case 1 :
         
@@ -372,6 +376,7 @@ int meniu (void)
         
         break;
 
+
         case 3 :
             lcd.setCursor (0, 0);
             lcd.print(text_sat[lb_sel]) ;
@@ -424,7 +429,8 @@ int meniu (void)
             }
 
         break;
-    //======================================================//   
+
+
         case 4 :
             lcd.setCursor (0, 0);
             lcd.print(text_poz[lb_sel]) ;
@@ -531,6 +537,7 @@ int meniu (void)
             }
 
         break ;
+
         
         case 6 :
             lcd.setCursor (0, 0);
@@ -564,6 +571,7 @@ int meniu (void)
             }
 
         break ;
+
 
         case 7 :
             lcd.setCursor (0, 0);
@@ -620,6 +628,7 @@ int meniu (void)
 
         break ;
 
+
         case 8 :
             lcd.setCursor (0, 0);
             lcd.print(text_lb[lb_sel] ) ;
@@ -639,7 +648,7 @@ int meniu (void)
 
         break ;
     
-    //======================================================//
+
         case 9 :
             static int var_about ;
 
@@ -691,6 +700,6 @@ int meniu (void)
     }
  
     return 0 ; 
-    
+
 }
 
