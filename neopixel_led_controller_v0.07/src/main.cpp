@@ -1,5 +1,5 @@
-#include <Arduino.h>
-#include <Wire.h>
+#include <Arduino.h>    // necesara pentru vsCode
+#include <Wire.h>       // necesara pentru vsCode
   // ____ librari incluse 
   //  #include <LiquidCrystal_I2C.h> // Librarie LCD i2c
   #include <LiquidCrystal.h>      // Livrarie LDC simplu
@@ -11,9 +11,10 @@
   // ____ setrai ale librariilor 
 
   // __LCD i2c
-  //  LiquidCrystal_I2C lcd (0x27, 16,2); // stabilim adresa si dimensiunea LCD
+  //  LiquidCrystal_I2C lcd (0x27, 16,2); // stabilim adresa si dimensiunea LCD  // stergem bara de comentariu daca avem lcd i2c 
+  
   //__ LCD simplu
-  LiquidCrystal lcd(8,9,4,5,6,7); 
+  LiquidCrystal lcd(8,9,4,5,6,7);  // o comentam daca avem lcd i2c
     
   // __NeoPixel
   #ifdef __AVR__
@@ -38,7 +39,7 @@
   int jocPos=1; // variabila pt selectare jocuri
   int op_disp [11] ; 
   int nr_optiuni_alocat = 11 ;  // numarul de setari alocate de joc 
-  char* NumeJoc; // stabilim o variabila pentru numele jocului actual
+  char* NumeJoc ; // stabilim o variabila pentru numele jocului actual
   const int nrJocuri = 4 ; // Stabilim numarul de jocuri pe care le avem !!! se va modifica de fiecare data cand creem un joc !!!
   int multiplu =1; // variabila creata pt a modifica mai usor setarile 
   int sel_settings = 0; // variabila pentru selectarea si afisarea setari
@@ -63,12 +64,8 @@
   int var_taste = 0 ;
   int lang_sell = 0 ;
 
-  char* lang_setting [2][9] { { "Limba:" ,  "Romana" ,  "SETARI",  "ultima modif in:",  "ultima modif la:",   "Despre controler",  "Versiune curenta:",  "v0.07",  "Apasa + sau -"  },
-                              {"Language:",     "English",  "SETTING",  "Last modify on:", "Last modify at:",    "About controler",  "Curent version:",   "v0.07",  "Pres + or  -"  } };
-                   
-  char* lang_menu[2][9] {"Joc:",  "Culoare:",  "Stralucire:",  "Saturatie:",  "Pozitia:",  "Umple:",  "Viteza:", "Intarziere:",  "val depasita",
-                         "Game:", "Color:",    "Brightes:",     "Saturation:", "Position:", "Fill:",   "Speed:",  "Delay:" ,     "over value" }; 
-
+  extern char* lang_setting [2][9] ;
+  extern char* lang_menu[2][9] ;
   void setup()
     {
     // setarile de start pentru LCD
@@ -95,8 +92,10 @@
     }
   
   void loop() 
-    {
+    {   
+        //extern int meniu_test ;
 
+       // meniu_test ++ ;
      
     jocuri(jocPos); // incepem cu primul joc
     
@@ -255,7 +254,7 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
      //--------------------- 1    2    3    4    5    6    7   8    9    10    
      set_setting_available (off, off, off, off, off, off, off, on, on ,off);
      
-     NumeJoc = lang_setting [lang_sell][2];
+     NumeJoc  = lang_setting [lang_sell][2];
 
      break;
 //======================================================//
@@ -265,7 +264,7 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
      
      bandaLed (culoare , saturatie , lumina , led_pos , led_fill) ; 
 
-     NumeJoc = "Jocu1" ;
+     NumeJoc  = (char*)"Jocu1" ;
      break;
 //======================================================//     
      case 2 :
@@ -285,7 +284,7 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
            
      bandaLed (culoare , saturatie , lumina , led_pos , led_fill) ;
      
-     NumeJoc = "Jocu2" ;
+     NumeJoc = (char*)"Jocu2" ;
      break;
 //======================================================//     
      case 3 :
@@ -294,7 +293,7 @@ void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , 
          
      bandaLed (culoare , saturatie , lumina , led_pos , led_fill) ;
      
-     NumeJoc = "Jocu3" ; 
+     NumeJoc = (char*)"Jocu3" ; 
      break;
 //======================================================// 
 
