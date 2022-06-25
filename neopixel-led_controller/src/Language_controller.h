@@ -22,4 +22,18 @@ char* text_dep[2] = {(char*)"val depasita", (char*)"over value" };
 char* text_px_cl [2] = { (char*)"Curatare led", (char*)"Pixel clear"};
 
 
+// culori
+#define ROSU 0
+#define PINK  60075
+#define ROZ 54613
+#define MOV 49152
+#define ALBASTRU 43690
+#define BLUE 38229
+#define CYEN 32768
+#define MAR 27307
+#define VERDE 21845
+#define LIME 16384
+#define GALBEN 10922
+#define PORTOCALIU 5461
+uint16_t CULORI[] {ROSU,PINK,ROZ,MOV,ALBASTRU,BLUE,CYEN,MAR,VERDE,LIME,GALBEN,PORTOCALIU};
 
