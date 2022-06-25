@@ -29,23 +29,27 @@
     Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
 // ____ variabile globale
-    int32_t culoare = 0  ; // culoare // ******in caz de eroare punem unsigned long*****8
-    int lumina = 55 ;// sabilim luminozitatea pixelilor
-    int saturatie = 255 ; // saturatia culori
+    uint16_t culoare = 0  ; // culoare // ******in caz de eroare punem unsigned long*****8
+    uint8_t lumina = 55 ;// sabilim luminozitatea pixelilor
+    uint8_t saturatie = 255 ; // saturatia culori
     int led_pos = 0 ; // pozitia ledului aprins
     int led_fill = 54 ; // cate leduri sunt umplute dupa led pos
-    int viteza = 1; // stabilim o variabila pt viteza
-    int intarziere = 100 ; // stabilim o variabila pt delay 
+    uint16_t viteza = 1; // stabilim o variabila pt viteza
+    uint32_t intarziere = 300 ; // stabilim o variabila pt delay 
 //
-    int jocPos=1; // variabila pt selectare jocuri
-    int op_disp [11] ; 
-    int nr_optiuni_alocat = 11 ;  // numarul de setari alocate de joc 
+    uint8_t jocPos=1; // variabila pt selectare jocuri
+    const int nr_optiuni_disponibile = 11 ;  // numarul de setari disponibile
+    int op_disp [nr_optiuni_disponibile] ; 
     char* NumeJoc ; // stabilim o variabila pentru numele jocului actual
-    const int nrJocuri = 4 ; // Stabilim numarul de jocuri pe care le avem !!! se va modifica de fiecare data cand creem un joc !!!
-    int multiplu =1; // variabila creata pt a modifica mai usor setarile 
-    int sel_settings = 0; // variabila pentru selectarea si afisarea setari
-    int var_taste = 0 ;
-    int lb_sel = 0 ;
+    const int nrJocuri = 5 ; // Stabilim numarul de jocuri pe care le avem !!! se va modifica de fiecare data cand creem un joc !!!
+    uint16_t multiplu =1; // variabila creata pt a modifica mai usor setarile 
+    uint8_t sel_settings = 0; // variabila pentru selectarea si afisarea setari
+    uint8_t var_taste = 0 ;
+    uint8_t lb_sel = 0 ;
+    int count = 0 ;
+    int led_pos1 ;
+    bool pix_cle = 1 ;
+
 // ____ prototipuri functi
  
     //input de la taste
@@ -54,13 +58,14 @@
     int meniu (void) ;
     // functia pentru schimbarea  jocurilor de lumini
     void jocuri (int select);
-    // functie asteapta
-    //int asteapta (int timp , unsigned long previousMillis ) ;
+    // functie de limitare
+    int lim_plus (int val , int val2 , int min , int max );
+    int lim_minus (int val , int val2 , int min , int max );
     
     //functie control leduri---culoare---saturatie----luminozitate---pozitie led --- led fill
     //necesara pentru a simplifica scrierea jocurilor pt ambele parti ale benzi de leduri
-    void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , unsigned fil ) ; 
-    void set_setting_available (int od1, int od2, int od3, int od4, int od5, int od6, int od7, int od8, int od9, int od10);
+    void two_circle (uint16_t col , uint8_t sat , uint8_t lux , uint32_t pos , uint32_t fil , uint32_t nr_pixel ,bool pixel_clear); 
+    void set_setting_available (bool od1, bool od2, bool od3, bool od4, bool od5, bool od6, bool od7, bool od8, bool od9, bool od10);
 
 #include "Functii.h"
 
@@ -83,7 +88,7 @@ void setup()
     pixels.show();
     pixels.setBrightness(255);
     // pornire serrial 
-    Serial.begin(9600) ;
+    //Serial.begin(9600) ;
     // printare mesaj de pornire
     lcd.clear();
     lcd.setCursor (5,0);
@@ -100,18 +105,19 @@ void loop()
 {   
     jocuri(jocPos); // incepem cu primul joc
     
-    unsigned long timp_curent_tasta = millis();  // creem o functie de delay care nu blocheaza procesorul 
+    // creem o functie de delay care nu blocheaza procesorul 
     static unsigned long delay_tasta ; 
-    if (timp_curent_tasta - delay_tasta >= 100 )  // avem nevoie de delay pt taste si lcd clear
+    if (millis() - delay_tasta >= 100 ) 
     {
         var_taste = taste();
-        delay_tasta = timp_curent_tasta;
+        delay_tasta = millis();
     }
     else 
     {
         var_taste = 0 ;
     }
-
+    //pixels.fill( pixels.ColorHSV(culoare , saturatie , lumina ) , led_pos , led_fill);
+     //  pixels.show();
     meniu ();
 }
 
@@ -134,7 +140,11 @@ void loop()
 */
 
 void jocuri (int select)
-{
+{   
+    if (select != 4) 
+    {
+        count = 1 ;
+    }
     
     switch (select)
     {
@@ -150,7 +160,7 @@ void jocuri (int select)
             //--------------------- 1   2   3   4   5   6   7   8    9    10 
             set_setting_available (on, on, on, on, on, on, on, off, off ,off);
      
-            bandaLed (culoare , saturatie , lumina , led_pos , led_fill) ; 
+            two_circle (culoare, saturatie, lumina, led_pos, led_fill, NUMPIXELS, off); 
 
             NumeJoc  = (char*)"Jocu1" ;
         break;
@@ -158,20 +168,11 @@ void jocuri (int select)
     
         case 2 :
             //--------------------- 1    2    3    4   5   6   7   8    9    10 
-            set_setting_available (off, off, off, on, on, on, on, on, off ,off);
+            set_setting_available (off, off, off, on, on, on, on, on, off ,on);
      
             culoare += viteza ;
 
-            if ( culoare > 65536 )
-            {
-                culoare = 0 ; 
-            }
-            else if ( culoare < 0 )
-            {
-                culoare = 65536 ;  
-            }
-
-            bandaLed (culoare , saturatie , lumina , led_pos , led_fill) ;
+            two_circle (culoare, saturatie, lumina, led_pos, led_fill, NUMPIXELS, pix_cle); 
      
             NumeJoc = (char*)"Jocu2" ;
         break;
@@ -179,12 +180,73 @@ void jocuri (int select)
     
         case 3 :
             //--------------------- 1   2   3   4   5   6   7   8    9    10 
-            set_setting_available (on, on, on, on, on, off, off, off, off ,off);
-         
-            bandaLed (culoare , saturatie , lumina , led_pos , led_fill) ;
+            set_setting_available (on, on, on, on, on, on, on, off, off ,on);
+
+            culoare += viteza ;
+
+
+
+            // creem o functie de delay care nu blocheaza procesorul 
+            static unsigned long delay_j3 ; 
+            if (millis() - delay_j3 >= intarziere )  
+            {
+                if (led_pos<(NUMPIXELS/2))
+                led_pos ++ ;
+                else 
+                led_pos = 0 ;
+
+                delay_j3 = millis();
+            }
+             
+
+
+            two_circle (culoare, saturatie, lumina, led_pos, led_fill, NUMPIXELS, pix_cle); 
      
             NumeJoc = (char*)"Jocu3" ; 
         break;
+
+
+        case 4 :
+
+            //--------------------- 1   2   3   4   5   6   7   8    9    10 
+            set_setting_available (on, on, on, on, on, on, on, off, off ,on);
+            static int led_pos_j4  ;
+            culoare += viteza ;
+            
+            static unsigned long delay_j4 ; 
+            if (millis() - delay_j4 >= intarziere ) 
+            {   
+                
+                if (led_fill >= NUMPIXELS / 2 )
+                {
+                    led_pos_j4 = led_pos ;
+                    led_fill= 1 ;
+                    culoare += 200;
+                }
+                else
+                {
+                    led_pos_j4 = lim_minus (led_pos_j4 , 1 , 0 , (NUMPIXELS/2)-1) ;
+                    led_fill +=2;
+                }
+
+                delay_j4 = millis();
+            }
+             
+
+            two_circle (culoare, saturatie, lumina, led_pos_j4, led_fill, NUMPIXELS, pix_cle); 
+     
+            NumeJoc = (char*)"Jocu4" ;
+
+        break;
+
+        default :
+            lcd.clear();
+            lcd.setCursor (0, 0);
+            lcd.print("eroare") ;
+        break;
+
+
+
     }
   
 }
@@ -196,14 +258,14 @@ void jocuri (int select)
 int meniu (void)
 {
 
-    unsigned long timp_curent_meniu = millis();  // creem o functie de delay care nu blocheaza procesorul 
+     // creem o functie de delay care nu blocheaza procesorul 
     static unsigned long delay_meniu ; 
 
-    if (timp_curent_meniu - delay_meniu >= 100 )  // avem nevoie de delay pt taste si lcd clear
+    if (millis() - delay_meniu >= 100 )
     {
         lcd.clear();
         
-        delay_meniu = timp_curent_meniu;
+        delay_meniu = millis();
     }
 
       
@@ -211,7 +273,7 @@ int meniu (void)
   
     if ( var_taste == 3 ) 
     {
-        if (sel_settings  < nr_optiuni_alocat-1)
+        if (sel_settings  < nr_optiuni_disponibile-1)
         {
             sel_settings  ++ ;
 
@@ -219,7 +281,7 @@ int meniu (void)
             {
                 sel_settings  ++ ;
 
-                if (sel_settings == nr_optiuni_alocat-1 && op_disp [sel_settings ] == off) 
+                if (sel_settings == nr_optiuni_disponibile-1 && op_disp [sel_settings ] == off) 
                 {
                     sel_settings = last_sel_settings ;
                     break ;
@@ -285,27 +347,27 @@ int meniu (void)
         
             if (var_taste == 1) 
             {
-                if(culoare+multiplu <= 65535)
-                {
+               // if(culoare+multiplu <= 65535)
+              //  {
                     culoare += multiplu ; // in cazul in care nu depasim val maxima a culori  , ridicam valoarea 
-                }
-                else                     
-                {
-                    culoare = culoare - 65536 + multiplu ;
-                }
+              //  }
+              //  else                     
+              //  {
+              //      culoare = culoare - 65536 + multiplu ;
+              //  }
             }
 
             else if (var_taste == 4)
             {
-                if (culoare-multiplu >= 0) // in cazul in care nu depasim val minima a culori  , scadem valoarea   
-                {
+             //   if (culoare-multiplu >= 0) // in cazul in care nu depasim val minima a culori  , scadem valoarea   
+             //   {
                     culoare -= multiplu ;
-                }
+             //   }
 
-                else
-                {
-                    culoare =culoare + 65536 - multiplu ;
-                }
+             //   else
+             //   {
+             //      culoare =culoare + 65536 - multiplu ;
+             //   }
             }
 
             else if (var_taste == 5)
@@ -584,37 +646,15 @@ int meniu (void)
                 
             if (var_taste == 1) 
             {
-                if(lumina+multiplu <= 255)
-                {
-                    lumina += multiplu ; // in cazul in care nu depasim val maxima a culori  , ridicam valoarea 
-                }
-
-                else                     
-                {
-                    lcd.setCursor(0,1);
-                    lcd.print (text_dep[lb_sel]);
-                }
-
+                    intarziere += multiplu ; // in cazul in care nu depasim val maxima a culori  , ridicam valoarea 
             }
-
             else if (var_taste == 4)
             {
-                if (lumina-multiplu >= 0) // in cazul in care nu depasim val minima a culori  , scadem valoarea 
-                {
-                    lumina -= multiplu ;
-                }
-
-                else
-                {
-                    lcd.setCursor(0,1);
-                    lcd.print (text_dep[lb_sel]);
-                }
-                
+                    intarziere -= multiplu ;
             }
-
             else if (var_taste == 5)
             {
-                if (multiplu<100)
+                if (multiplu<10000)
                 {
                     multiplu *= 10 ; 
                 }
@@ -689,6 +729,34 @@ int meniu (void)
 
 
         break ;
+
+
+        case 10 :
+
+            lcd.setCursor (0, 0);
+            lcd.print(text_px_cl[lb_sel] ) ;
+            if(pix_cle)
+            {
+                lcd.print(":ON");
+            }
+            else
+            {
+                lcd.print(":OFF");
+            }
+
+                
+            if (var_taste == 1 && pix_cle < 1) 
+            {
+                pix_cle = 1 ;
+            }
+            
+            else if (var_taste == 4 && pix_cle > 0)
+            {
+                pix_cle = 0 ;
+            }
+
+        break;
+        
 
     
         default :

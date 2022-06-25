@@ -45,43 +45,36 @@ int taste (void)
 
 
 
-
-void bandaLed (unsigned long col , unsigned sat , unsigned lux , unsigned pos , unsigned fil ) 
+ void two_circle (uint16_t col , uint8_t sat , uint8_t lux , uint32_t pos , uint32_t fil , uint32_t nr_pixel ,bool pixel_clear) 
 { 
-    pixels.clear();
-
+    if(pixel_clear) 
+    {
+        pixels.clear();
+    }
     // conditionam pozitia ledurilor aprinse pentru a crea o singura bucla
     // in cazul in care se ajuge la capat , o sa continue de la inceput , creen forma de cerc
-    if ( led_fill + led_pos > (NUMPIXELS/2) )
+    if ( fil + pos > nr_pixel/2 )
     {  
-        pixels.fill( pixels.ColorHSV(col , sat , lux ) , pos , (NUMPIXELS/2) - pos);
-        pixels.fill( pixels.ColorHSV(col , sat , lux ) , 0 , fil-((NUMPIXELS/2)-pos)); 
+        pixels.fill( pixels.ColorHSV(col , sat , lux ) , pos , (nr_pixel/2) - pos);
+        pixels.fill( pixels.ColorHSV(col , sat , lux ) , 0 , fil-((nr_pixel/2)-pos)); 
+
+        pixels.fill( pixels.ColorHSV(col , sat , lux) , pos + (nr_pixel/2) , (nr_pixel/2) - pos);
+        pixels.fill( pixels.ColorHSV(col , sat , lux ) , (nr_pixel/2) , fil-((nr_pixel/2)-pos));
     }
 
     else
     {
-        pixels.fill( pixels.ColorHSV(col , sat , lux ) , pos , fil); 
+        pixels.fill( pixels.ColorHSV(col , sat , lux ) , pos , fil);
+
+        pixels.fill( pixels.ColorHSV(col , sat , lux ) , pos +(nr_pixel/2) , fil);
     }
-        
-    if ( led_fill + led_pos > (NUMPIXELS/2) )
-    {
-        pixels.fill( pixels.ColorHSV(col , sat , lux) , pos + (NUMPIXELS/2) , (NUMPIXELS/2) - pos);
-        pixels.fill( pixels.ColorHSV(col , sat , lux ) , (NUMPIXELS/2) , fil-((NUMPIXELS/2)-pos)); 
-    }
-
-    else
-    {
-        pixels.fill( pixels.ColorHSV(col , sat , lux ) , pos +(NUMPIXELS/2) , fil);
-    }
-
-    pixels.show(); 
-} 
-          
+       pixels.show();     
+}         
 
 
 
 
-void set_setting_available (int od1, int od2, int od3, int od4, int od5, int od6, int od7, int od8, int od9, int od10)
+void set_setting_available (bool od1, bool od2, bool od3, bool od4, bool od5, bool od6, bool od7, bool od8, bool od9, bool od10)
 {
     op_disp [0] = on ;  
     op_disp [1] = od1;
@@ -94,6 +87,19 @@ void set_setting_available (int od1, int od2, int od3, int od4, int od5, int od6
     op_disp [8] = od8;
     op_disp [9] = od9;
     op_disp [10] = od10;
+}
+
+
+int lim_plus (int val , int val2 , int min , int max )
+{
+    if (val+val2 > max) return min+val2-val ;
+    else return val+val2 ; 
+}
+
+int lim_minus (int val , int val2  , int min , int max )
+{
+    if (val-val2 < min) return max+val-val2 ;
+    else return val-val2 ; 
 }
 
 
