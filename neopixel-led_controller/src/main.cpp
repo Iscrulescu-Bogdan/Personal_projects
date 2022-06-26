@@ -41,7 +41,11 @@
     const int nr_optiuni_disponibile = 11 ;  // numarul de setari disponibile           !!! se modifica in  cazul adaugari unei setari 
     int op_disp [nr_optiuni_disponibile] ; 
     char* NumeJoc ; // stabilim o variabila pentru numele jocului actual
+<<<<<<< HEAD
     const int nrJocuri = 9 ; // Stabilim numarul de jocuri pe care le avem              !!! se va modifica de fiecare data cand creem un joc !!!
+=======
+    const int nrJocuri = 10 ; // Stabilim numarul de jocuri pe care le avem              !!! se va modifica de fiecare data cand creem un joc !!!
+>>>>>>> 4fdccbdf7b709b50fadc3cfa2e1a3d4efda61e8b
     uint16_t multiplu =1; // variabila creata pt a modifica mai usor setarile 
     uint8_t sel_settings = 0; // variabila pentru selectarea si afisarea setari
     uint8_t var_taste = 0 ;
@@ -303,6 +307,7 @@ void jocuri (int select)
         break;
 
         case 6 :
+<<<<<<< HEAD
             while(count) // creem o functie care va seta anumite variabile doar atunci cand se schimba jocul
             {
                 //--------------------- 1   2   3   4   5   6   7   8    9    10 
@@ -312,6 +317,10 @@ void jocuri (int select)
                 break; // doar pentru siguranta
             }
 
+=======
+            //--------------------- 1   2   3   4   5   6   7   8    9    10 
+            set_setting_available (off, on, off, off, off, off, on, off, off ,off);
+>>>>>>> 4fdccbdf7b709b50fadc3cfa2e1a3d4efda61e8b
             static uint16_t led_pos_j6 = 0 ; 
             static unsigned long delay_j6 ; 
             if (millis() - delay_j6 >= intarziere )  
@@ -344,6 +353,7 @@ void jocuri (int select)
         break;
 
         case 7 :
+<<<<<<< HEAD
             while(count) // creem o functie care va seta anumite variabile doar atunci cand se schimba jocul
             {
                //--------------------- 1   2   3   4   5   6   7   8    9    10 
@@ -352,6 +362,10 @@ void jocuri (int select)
                 count=0 ; // inchidem while
                 break; // doar pentru siguranta
             }
+=======
+            //--------------------- 1   2   3   4   5   6   7   8    9    10 
+            set_setting_available (off, on, off, off, off, off, on, off, off ,off);
+>>>>>>> 4fdccbdf7b709b50fadc3cfa2e1a3d4efda61e8b
 
             static uint8_t count_j7 ;
 
@@ -397,6 +411,7 @@ void jocuri (int select)
         break;
 
         case 8 :
+<<<<<<< HEAD
             while(count) // creem o functie care va seta anumite variabile doar atunci cand se schimba jocul
             {
                 //--------------------- 1   2   3   4   5   6   7   8    9    10
@@ -406,6 +421,10 @@ void jocuri (int select)
                 count=0 ; // inchidem while
                 break; // doar pentru siguranta
             }
+=======
+            //--------------------- 1   2   3   4   5   6   7   8    9    10
+            set_setting_available (off, on, off, off, on, off, on, off, off ,off);
+>>>>>>> 4fdccbdf7b709b50fadc3cfa2e1a3d4efda61e8b
 
             static uint16_t culoare_j8;
             static uint16_t culoare2_j8;
@@ -449,6 +468,7 @@ void jocuri (int select)
         break;
 
         case 9 :
+<<<<<<< HEAD
             while(count) // creem o functie care va seta anumite variabile doar atunci cand se schimba jocul
             {
                 //--------------------- 1   2   3   4   5   6   7   8    9    10
@@ -458,6 +478,10 @@ void jocuri (int select)
                 break; // doar pentru siguranta
             }            
 
+=======
+            //--------------------- 1   2   3   4   5   6   7   8    9    10
+            set_setting_available (off, on, off, off, off, off, on, off, off ,off);
+>>>>>>> 4fdccbdf7b709b50fadc3cfa2e1a3d4efda61e8b
             static uint16_t culoare_j9; 
             static int led_pos_j9 = 0;
             static int led_fill_j9 =1 ;
