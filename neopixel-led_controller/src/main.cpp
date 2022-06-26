@@ -41,7 +41,7 @@
     const int nr_optiuni_disponibile = 11 ;  // numarul de setari disponibile           !!! se modifica in  cazul adaugari unei setari 
     int op_disp [nr_optiuni_disponibile] ; 
     char* NumeJoc ; // stabilim o variabila pentru numele jocului actual
-    const int nrJocuri = 8 ; // Stabilim numarul de jocuri pe care le avem              !!! se va modifica de fiecare data cand creem un joc !!!
+    const int nrJocuri = 9 ; // Stabilim numarul de jocuri pe care le avem              !!! se va modifica de fiecare data cand creem un joc !!!
     uint16_t multiplu =1; // variabila creata pt a modifica mai usor setarile 
     uint8_t sel_settings = 0; // variabila pentru selectarea si afisarea setari
     uint8_t var_taste = 0 ;
@@ -121,7 +121,10 @@ void loop()
     meniu ();
 }
 
-
+//####################################################################################################################################
+//####################################################################################################################################
+//####################################################################################################################################
+//####################################################################################################################################
 
 
 
@@ -141,46 +144,72 @@ void loop()
 
 void jocuri (int select)
 {   
-    if (select != 4) 
-    {
-        count = 1 ;
-    }
+
     
     switch (select)
     {
         case 0:
-            //--------------------- 1    2    3    4    5    6    7   8    9    10    
-            set_setting_available (off, off, off, off, off, off, off, on, on ,off);
+            while(count) // creem o functie care va seta anumite variabile doar atunci cand se schimba jocul
+            {
+                //--------------------- 1    2    3    4    5    6    7   8    9    10    
+                set_setting_available (off, off, off, off, off, off, off, on, on ,off);
+                count=0 ; // inchidem while
+                break; // doar pentru siguranta
+            }
 
             NumeJoc  = text_setari[lb_sel] ;
         break;
 
 
         case 1 :
-            //--------------------- 1   2   3   4   5   6   7   8    9    10 
-            set_setting_available (on, on, on, on, on, on, on, off, off ,on);
+            while(count) // creem o functie care va seta anumite variabile doar atunci cand se schimba jocul
+            {
+                //--------------------- 1   2   3   4   5   6   7   8    9    10 
+                set_setting_available (on, on, on, on, on, on, on, off, off ,on);
+                led_pos = 0 ;
+                led_fill = NUMPIXELS/2 ;
+
+                count=0 ; // inchidem while
+                break; // doar pentru siguranta
+
+            }
+
      
             two_circle (culoare, saturatie, lumina, led_pos, led_fill, NUMPIXELS, pix_cle); 
 
-            NumeJoc  = (char*)"Jocu1" ;
+            NumeJoc  = (char*)"Jocul 1" ;
         break;
 
     
         case 2 :
-            //--------------------- 1    2    3    4   5   6   7   8    9    10 
-            set_setting_available (off, off, off, on, on, on, on, on, off ,on);
-     
+            while(count) // creem o functie care va seta anumite variabile doar atunci cand se schimba jocul
+            {
+                //--------------------- 1    2    3    4   5   6   7   8    9    10 
+                set_setting_available (off, off, off, on, on, on, on, on, off ,on);
+                led_pos = 0 ;
+                led_fill = NUMPIXELS/2 ;
+
+                count=0 ; // inchidem while
+                break; // doar pentru siguranta
+            }     
             culoare += viteza ;
 
             two_circle (culoare, saturatie, lumina, led_pos, led_fill, NUMPIXELS, pix_cle); 
      
-            NumeJoc = (char*)"Jocu2" ;
+            NumeJoc = (char*)"Jocul 2" ;
         break;
 
     
         case 3 :
-            //--------------------- 1   2   3   4   5   6   7   8    9    10 
-            set_setting_available (on, on, on, on, on, on, on, off, off ,on);
+            while(count) // creem o functie care va seta anumite variabile doar atunci cand se schimba jocul
+            {
+                //--------------------- 1   2   3   4   5   6   7   8    9    10 
+                set_setting_available (on, on, on, on, on, on, on, off, off ,on);
+                led_pos = 0 ;
+                led_fill = NUMPIXELS/4 ;
+                count=0 ; // inchidem while
+                break; // doar pentru siguranta
+            }
 
             culoare += viteza ;
 
@@ -202,14 +231,22 @@ void jocuri (int select)
 
             two_circle (culoare, saturatie, lumina, led_pos, led_fill, NUMPIXELS, pix_cle); 
      
-            NumeJoc = (char*)"Jocu3" ; 
+            NumeJoc = (char*)"Jocul 3" ; 
         break;
 
 
         case 4 :
+            while(count) // creem o functie care va seta anumite variabile doar atunci cand se schimba jocul
+            {
+                //--------------------- 1   2   3   4   5   6   7   8    9    10 
+                set_setting_available (on, on, on, on, on, on, on, off, off ,on);
+                led_pos = 0 ;
+                led_fill = 1 ;
 
-            //--------------------- 1   2   3   4   5   6   7   8    9    10 
-            set_setting_available (on, on, on, on, on, on, on, off, off ,on);
+                count=0 ; // inchidem while
+                break; // doar pentru siguranta
+            }
+
             static int led_pos_j4  ;
             culoare += viteza ;
             
@@ -235,13 +272,20 @@ void jocuri (int select)
 
             two_circle (culoare, saturatie, lumina, led_pos_j4, led_fill, NUMPIXELS, pix_cle); 
      
-            NumeJoc = (char*)"Jocu4" ;
+            NumeJoc = (char*)"Jocul 4" ;
 
         break;
         
         case 5 :
-            //--------------------- 1   2   3   4   5   6   7   8    9    10 
-            set_setting_available (on, on, on, on, on, on, on, off, off ,on);
+            while(count) // creem o functie care va seta anumite variabile doar atunci cand se schimba jocul
+            {
+                //--------------------- 1   2   3   4   5   6   7   8    9    10 
+                set_setting_available (off, on, off, off, off, off, on, off, off ,off);
+
+                count=0 ; // inchidem while
+                break; // doar pentru siguranta
+            }
+
             static int x = 0 ;
             static unsigned long delay_j5 ; 
             if (millis() - delay_j5 >= intarziere )  
@@ -255,12 +299,19 @@ void jocuri (int select)
             }
             two_circle (CULORI[x], saturatie, lumina, 0 , NUMPIXELS/2, NUMPIXELS, pix_cle); 
      
-            NumeJoc = (char*)"Jocu5" ;
+            NumeJoc = (char*)"Jocul 5" ;
         break;
 
         case 6 :
-            //--------------------- 1   2   3   4   5   6   7   8    9    10 
-            set_setting_available (on, on, on, on, on, on, on, off, off ,on);
+            while(count) // creem o functie care va seta anumite variabile doar atunci cand se schimba jocul
+            {
+                //--------------------- 1   2   3   4   5   6   7   8    9    10 
+                set_setting_available (off, on, off, off, off, off, on, off, off ,off);
+            
+                count=0 ; // inchidem while
+                break; // doar pentru siguranta
+            }
+
             static uint16_t led_pos_j6 = 0 ; 
             static unsigned long delay_j6 ; 
             if (millis() - delay_j6 >= intarziere )  
@@ -293,8 +344,14 @@ void jocuri (int select)
         break;
 
         case 7 :
-            //--------------------- 1   2   3   4   5   6   7   8    9    10 
-            set_setting_available (on, on, on, on, on, on, on, off, off ,on);
+            while(count) // creem o functie care va seta anumite variabile doar atunci cand se schimba jocul
+            {
+               //--------------------- 1   2   3   4   5   6   7   8    9    10 
+                set_setting_available (off, on, off, off, off, off, on, off, off ,off);
+
+                count=0 ; // inchidem while
+                break; // doar pentru siguranta
+            }
 
             static uint8_t count_j7 ;
 
@@ -305,7 +362,7 @@ void jocuri (int select)
                 delay_j7 = millis();
             }  
                 
-            if (count_j7 >= 0 && count_j7 <= 1  || count_j7 >= 4 && count_j7 <= 5 )
+            if ((count_j7 >= 0 && count_j7 <= 1 ) || ( count_j7 >= 4 && count_j7 <= 5 ))
             {
                 two_circle (ROSU, saturatie, lumina, 0, NUMPIXELS/4,NUMPIXELS ,off); 
                 two_circle (ALBASTRU, saturatie, lumina, NUMPIXELS/4, NUMPIXELS/4,NUMPIXELS ,off);
@@ -339,12 +396,96 @@ void jocuri (int select)
             lcd.print("eroare") ;
         break;
 
+        case 8 :
+            while(count) // creem o functie care va seta anumite variabile doar atunci cand se schimba jocul
+            {
+                //--------------------- 1   2   3   4   5   6   7   8    9    10
+                set_setting_available (off, on, off, off, on, off, on, off, off ,off);
+                led_fill = NUMPIXELS/4 ;
+
+                count=0 ; // inchidem while
+                break; // doar pentru siguranta
+            }
+
+            static uint16_t culoare_j8;
+            static uint16_t culoare2_j8;
+            static int led_pos_j8 = 0;
+            static int led_pos2_j8 = NUMPIXELS-1;
+
+            static unsigned long delay_j8 ; 
+            if (millis() - delay_j8 >= intarziere )  
+            {   
+                if(led_pos_j8<(NUMPIXELS/2)-1)
+                {
+                    led_pos_j8 ++;
+                }
+                else
+                {
+                    led_pos_j8 = 0;    
+                }
+
+                if(led_pos2_j8 >NUMPIXELS/2)
+                {
+                    led_pos2_j8 --;
+                }
+                else
+                {
+                    led_pos2_j8 = NUMPIXELS-1;    
+                }
+
+                culoare_j8 = random() ;
+                culoare2_j8 = random() ; 
+
+                delay_j8 = millis();
+            }  
+
+            pixels.clear();
+            pixels.fill( pixels.ColorHSV(culoare_j8 , 255 , lumina ) , led_pos_j8 , led_fill);
+            pixels.fill( pixels.ColorHSV(culoare2_j8 , 255 , lumina ) , led_pos2_j8 , led_fill);
+            pixels.show();
 
 
+            NumeJoc = (char*)"Jocul 8" ;
+        break;
+
+        case 9 :
+            while(count) // creem o functie care va seta anumite variabile doar atunci cand se schimba jocul
+            {
+                //--------------------- 1   2   3   4   5   6   7   8    9    10
+                set_setting_available (off, on, off, off, off, off, on, off, off ,off);
+            
+                count=0 ; // inchidem while
+                break; // doar pentru siguranta
+            }            
+
+            static uint16_t culoare_j9; 
+            static int led_pos_j9 = 0;
+            static int led_fill_j9 =1 ;
+
+            static unsigned long delay_j9 ; 
+            if (millis() - delay_j9 >= intarziere )  
+            {
+                culoare_j9 = random();
+                led_pos_j9 = random (0,NUMPIXELS-1);
+                led_fill_j9 = random (1,5);
+
+                delay_j9 = millis();
+            }
+
+            pixels.fill( pixels.ColorHSV(culoare_j9 , 255 , lumina ) , led_pos_j9 , led_fill_j9);
+            pixels.show();
+
+
+        NumeJoc = (char*)"Jocul 9" ;
+        break;
     }
   
 }
 
+//####################################################################################################################################
+//####################################################################################################################################
+//####################################################################################################################################
+//####################################################################################################################################
 
 
 
@@ -363,7 +504,8 @@ int meniu (void)
     }
 
       
-    int last_sel_settings = sel_settings ;
+    static int last_sel_settings ;
+    last_sel_settings = sel_settings ;
   
     if ( var_taste == 3 ) 
     {
@@ -412,19 +554,28 @@ int meniu (void)
     
             lcd.setCursor (0, 0);
             if (jocPos !=0 )
+            {
                 lcd.print(text_joc[lb_sel]);
+            }
+
             lcd.print (NumeJoc);
 
             // citire taste   
             if (var_taste == 1) 
             {
                 if(jocPos<nrJocuri)
-                    jocPos++ ; // in cazul in care nu depasim nr de jocuri , trecem la urmatorul 
+                {
+                    jocPos++ ; // in cazul in care nu depasim nr de jocuri , trecem la urmatorul
+                    count = 1 ; 
+                }
             }
             else if (var_taste == 4)
             {
                 if (jocPos>0)
+                {
                     jocPos-- ;
+                    count = 1 ;
+                }
             } 
           
         break;
