@@ -1,5 +1,5 @@
-#include <string.h>
-#include <stdio.h>
+//#include <string.h>
+//#include <stdio.h>
 
 char* text_lb[2] = {(char*)"Limba:", (char*)"Language:" };
 char* text_Nume_lb[2] = {(char*)"Romana" , (char*)"English"};
