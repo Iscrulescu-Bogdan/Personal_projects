@@ -9,7 +9,9 @@
 ##      - Keyestudio 1602LCD Keypad Shield For Arduino LCD      ## 
 ##      - Adafruit NeoPixel Digital RGB LED Strip               ## 
 ##         ->(lenght is 108 led folded in two circles)          ##
-##                                                              ## 
+##                                                              ##
+##      Version v0.11   Project still in progres                ##
+##                                                              ##
 ##################################################################
 */
 
