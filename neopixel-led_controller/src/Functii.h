@@ -102,4 +102,104 @@ int lim_minus (int val , int val2  , int min , int max )
     else return val-val2 ; 
 }
 
+void serail_usb (void)
+{
 
+    static char message [20];
+    static char message2[20];
+    static int count_serial = 0 ;
+    char incomingByte = 0 ;
+    uint32_t valoare = 0 ;
+
+        incomingByte = Serial.read() ;
+        message[count_serial] = incomingByte;
+        if (count_serial >= 20 )
+        {
+            count_serial = 0 ;
+            Serial.print ("Lungime mesaj depasita !");
+        //    break;
+        }
+        else
+        {
+            count_serial ++ ;
+        }
+
+        Serial.print(incomingByte);
+    
+
+    for (int i = 0; i<15 ; i++ )
+    {
+        message2[i]=message[i+3];
+    }
+
+
+    if (incomingByte == '.')
+    {   
+        Serial.println("");      
+        Serial.print("Mesajul primit este :  "); 
+        Serial.println(message);
+        count_serial=0;
+        valoare = atoi (message2);
+        set_var (message , valoare);
+        Serial.print ("Valoarea este : ");
+        Serial.println (valoare);
+
+        for (int i = 0; i < 20; i++)
+        {
+            message[i]= '\0';
+            message2[i]='\0' ; 
+        } 
+
+
+    }
+
+}
+
+void set_var (char* set , int val)
+{
+    if (strncmp(set , "cul",3) == 0 )
+    {
+        culoare = val ;
+    }
+
+    else if (strncmp(set , "lum",3) == 0 )
+    {
+        lumina = val ; 
+    }
+
+    else if (strncmp(set , "sat",3) == 0 )
+    {
+        saturatie = val ;
+    }
+
+    else if (strncmp(set , "pos",3) == 0 )
+    {
+        led_pos = val ;
+    }
+
+    else if (strncmp(set , "fil",3) == 0 )
+    {
+        led_fill = val ;
+    }
+
+    else if (strncmp(set , "vit",3) == 0 )
+    {
+        viteza = val ;
+    }
+
+    else if (strncmp(set , "int",3) == 0 )
+    {
+        intarziere = val ;
+    }
+
+    else if (strncmp(set , "joc",3) == 0 )
+    {
+        jocPos = val ;
+    }
+
+    else if (strncmp(set , "tas",3) == 0 )
+    {
+        var_taste = val ;       
+    }
+
+}

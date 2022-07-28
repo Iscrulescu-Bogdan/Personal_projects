@@ -20,6 +20,7 @@
     #include <LiquidCrystal.h>      // Librarie LDC simplu
     #include <Adafruit_NeoPixel.h> // Librarie Banda NeoPixel
     #include "Language_controller.h" // includem fisierul cu dictionarul de limba
+    #include <string.h>
     // definiti pentru functi 
     //#define VAR_ASTEAPTA unsigned long int
 
@@ -76,11 +77,16 @@
     // functie de limitare
     int lim_plus (int val , int val2 , int min , int max );
     int lim_minus (int val , int val2 , int min , int max );
+    // functie pentru comunicare prin serial monitor  
+    void serail_usb (void);
+    //
+    void set_var (char* set , int val);
     
     //functie control leduri---culoare---saturatie----luminozitate---pozitie led --- led fill
     //necesara pentru a simplifica scrierea jocurilor pt ambele parti ale benzi de leduri
     void two_circle (uint16_t col , uint8_t sat , uint8_t lux , uint32_t pos , uint32_t fil , uint32_t nr_pixel ,bool pixel_clear); 
     void set_setting_available (bool od1, bool od2, bool od3, bool od4, bool od5, bool od6, bool od7, bool od8, bool od9, bool od10);
+    
 
 #include "Functii.h" // includem fisierul cu functii 
 
@@ -103,13 +109,14 @@ void setup()
     pixels.show();
     pixels.setBrightness(255);
     // pornire serrial 
-    //Serial.begin(9600) ;
+    Serial.begin(9600) ;
     // printare mesaj de pornire
     lcd.clear();
     lcd.setCursor (5,0);
     lcd.print ("Welcome!"); 
     delay(2000);
     lcd.clear();
+    Serial.println("Serial monitor is on");
 }
   
 
@@ -130,6 +137,11 @@ void loop()
     else 
     {
         var_taste = 0 ;
+    }
+
+    if(Serial.available()>0)
+    {
+        serail_usb ();
     }
     //pixels.fill( pixels.ColorHSV(culoare , saturatie , lumina ) , led_pos , led_fill);
      //  pixels.show();
