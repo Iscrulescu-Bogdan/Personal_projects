@@ -10,7 +10,7 @@
 ##      - Adafruit NeoPixel Digital RGB LED Strip               ## 
 ##         ->(lenght is 108 led folded in two circles)          ##
 ##                                                              ##
-##      Version v0.1.11   Project still in progres              ##
+##      Version v0.2.11   Project still in progres              ##
 ##                                                              ##
 ##################################################################
 */
@@ -19,7 +19,7 @@
     //  #include <LiquidCrystal_I2C.h> // Librarie LCD i2c
     #include <LiquidCrystal.h>      // Librarie LDC simplu
     #include <Adafruit_NeoPixel.h> // Librarie Banda NeoPixel
-    #include "Language_controller.h" // includem fisierul cu dictionarul de limba
+    #include "Language_controller_V2.h" // includem fisierul cu dictionarul de limba
     #include <string.h>
     // definiti pentru functi 
     //#define VAR_ASTEAPTA unsigned long int
@@ -88,7 +88,7 @@
     void set_setting_available (bool od1, bool od2, bool od3, bool od4, bool od5, bool od6, bool od7, bool od8, bool od9, bool od10);
     
 
-#include "Functii.h" // includem fisierul cu functii 
+#include "Functii_V2.h" // includem fisierul cu functii 
 
 
 
