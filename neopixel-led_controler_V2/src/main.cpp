@@ -40,31 +40,23 @@
     #define NUMPIXELS      108  // definim  numarul de pixeli
     #define on 1
     #define off 0
+    #define NR_SETTING 20
     
     // stabilim numele benzi de leduri
     Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
-// ____ variabile globale
-    uint16_t culoare = 0  ; // culoare 
-    uint8_t lumina = 55 ;// sabilim luminozitatea pixelilor
-    uint8_t saturatie = 255 ; // saturatia culori
-    uint16_t led_pos = 0 ; // pozitia ledului aprins
-    uint16_t led_fill = 54 ; // cate leduri sunt umplute dupa led pos
-    uint16_t viteza = 1; // stabilim o variabila pt viteza
-    uint32_t intarziere = 300 ; // stabilim o variabila pt delay 
+
 //
-    uint8_t jocPos=1; // variabila pt selectare jocuri
     const int nr_optiuni_disponibile = 11 ;  // numarul de setari disponibile           !!! se modifica in  cazul adaugari unei setari 
     int op_disp [nr_optiuni_disponibile] ; 
-    char* NumeJoc ; // stabilim o variabila pentru numele jocului actual
-    const int nrJocuri = 10 ; // Stabilim numarul de jocuri pe care le avem              !!! se va modifica de fiecare data cand creem un joc !!!
-    uint16_t multiplu =1; // variabila creata pt a modifica mai usor setarile 
-    uint8_t sel_settings = 0; // variabila pentru selectarea si afisarea setari
+    char* NumeJoc ; // stabilim o varS pentru numele jocului actual
+    const int nrJocuri = 10 ; // Stabilim numarul de jocuri pe care le avem              !!! se va modifica de fiecare data cand creem un joc !!! 
     uint8_t var_taste = 0 ;
-    uint8_t lb_sel = 0 ;
+    int setare_set = 0 ;
+    int multiplu_set = 1 ;
+    
     bool count = 0 ;
-    int led_pos1 ;
-    bool pix_cle = 1 ;
+
 
 // ____ prototipuri functi
  
@@ -86,7 +78,25 @@
     //necesara pentru a simplifica scrierea jocurilor pt ambele parti ale benzi de leduri
     void two_circle (uint16_t col , uint8_t sat , uint8_t lux , uint32_t pos , uint32_t fil , uint32_t nr_pixel ,bool pixel_clear); 
     void set_setting_available (bool od1, bool od2, bool od3, bool od4, bool od5, bool od6, bool od7, bool od8, bool od9, bool od10);
-    
+    void initializare (void);
+    void afisareDisplay ( char *text_a, uint32_t var_a, int multiplu_a ,int txt2, char *text2_a);
+    void control (int comanda ,int &setare_c , int nr_setari, uint32_t &var_c, int min_var , uint32_t max_var , int &multiplu_c, int multiplu_max);
+
+
+//
+
+struct parametri 
+{
+   
+   char* text_limba [2];
+   uint32_t varS ;
+   int min ;
+   uint32_t max ;
+   int multipluMax ;
+   //char* text_2 [2] ; 
+
+}set[NR_SETTING];
+
 
 #include "Functii_V2.h" // includem fisierul cu functii 
 
@@ -125,11 +135,18 @@ void setup()
 
 void loop() 
 {   
-    jocuri(jocPos); // incepem cu primul joc
-    
+   jocuri(set[0].varS); // incepem cu primul joc
+
+    static int statusx = 1 ;
+    if(statusx)
+    {
+        initializare();
+        statusx -- ;
+    }
+
     // creem o functie de delay care nu blocheaza procesorul 
     static unsigned long delay_tasta ; 
-    if (millis() - delay_tasta >= 100 ) 
+    if (millis() - delay_tasta >= 200 ) 
     {
         var_taste = taste();
         delay_tasta = millis();
@@ -139,13 +156,33 @@ void loop()
         var_taste = 0 ;
     }
 
-    if(Serial.available()>0)
+
+
+static unsigned long delay_meniu ;
+        if (millis() - delay_meniu >= 100 )
     {
-        serail_usb ();
+        lcd.clear();
+        
+        delay_meniu = millis();
     }
-    //pixels.fill( pixels.ColorHSV(culoare , saturatie , lumina ) , led_pos , led_fill);
-     //  pixels.show();
-    meniu ();
+
+
+
+    
+    
+    control (var_taste , setare_set , NR_SETTING, set[setare_set].varS , set[setare_set].max ,  multiplu_set,  set[setare_set].multipluMax);
+
+    afisareDisplay (set[setare_set].text_limba[set[8].varS], set[setare_set].varS, multiplu_set,setare_set, NumeJoc );//, set[setare_set].text_2);
+
+
+    //if(Serial.available()>0)
+    //{
+    //    serail_usb ();
+    //}
+            //pixels.fill( pixels.ColorHSV(culoare , saturatie , set[2].varS ) , set[4].varS , set[5].varS);
+            //  pixels.show();
+//   meniu ();
+
 }
 
 //#####################################################################################################################################
@@ -184,7 +221,7 @@ void jocuri (int select)
                 break; // doar pentru siguranta
             }
 
-            NumeJoc  = text_setari[lb_sel] ;
+            NumeJoc  = text_setari[set[8].varS] ;
         break;
 
 
@@ -193,10 +230,10 @@ void jocuri (int select)
             {
                 //--------------------- 1   2   3   4   5   6   7   8    9    10 
                 set_setting_available (on, on, on, on, on, on, on, off, off ,on);
-                pix_cle = on ;
-                saturatie = 255;
-                led_pos = 0 ;
-                led_fill = NUMPIXELS/2 ;
+                set[9].varS = on ;
+                set[3].varS = 255;
+                set[4].varS = 0 ;
+                set[5].varS = NUMPIXELS/2 ;
 
                 count=0 ; // inchidem while
                 break; // doar pentru siguranta
@@ -204,7 +241,7 @@ void jocuri (int select)
             }
 
      
-            two_circle (culoare, saturatie, lumina, led_pos, led_fill, NUMPIXELS, pix_cle); 
+            two_circle (set[1].varS, set[3].varS, set[2].varS, set[4].varS, set[5].varS, NUMPIXELS, set[9].varS); 
 
             NumeJoc  = (char*)"Jocul 1" ;
         break;
@@ -215,18 +252,18 @@ void jocuri (int select)
             {
                 //--------------------- 1    2    3    4   5   6   7   8    9    10 
                 set_setting_available (off, off, off, on, on, on, on, on, off ,on);
-                pix_cle = on ;
-                saturatie = 255;
-                viteza=50;
-                led_pos = 0 ;
-                led_fill = NUMPIXELS/2 ;
+                set[9].varS = on ;
+                set[3].varS = 255;
+                set[6].varS=50;
+                set[4].varS = 0 ;
+                set[5].varS = NUMPIXELS/2 ;
 
                 count=0 ; // inchidem while
                 break; // doar pentru siguranta
             }     
-            culoare += viteza ;
+            set[1].varS += set[6].varS ;
 
-            two_circle (culoare, saturatie, lumina, led_pos, led_fill, NUMPIXELS, pix_cle); 
+            two_circle (set[1].varS, set[3].varS, set[2].varS, set[4].varS, set[5].varS, NUMPIXELS, set[9].varS); 
      
             NumeJoc = (char*)"Jocul 2" ;
         break;
@@ -237,35 +274,35 @@ void jocuri (int select)
             {
                 //--------------------- 1   2   3   4   5   6   7   8    9    10 
                 set_setting_available (on, on, on, on, on, on, on, off, off ,on);
-                pix_cle = on ;
-                saturatie = 255;
-                intarziere = 50 ;
-                viteza = 50 ; 
-                led_pos = 0 ;
-                led_fill = NUMPIXELS/4 ;
+                set[9].varS = on ;
+                set[3].varS = 255;
+                set[7].varS = 50 ;
+                set[6].varS = 50 ; 
+                set[4].varS = 0 ;
+                set[5].varS = NUMPIXELS/4 ;
                 count=0 ; // inchidem while
                 break; // doar pentru siguranta
             }
 
-            culoare += viteza ;
+            set[1].varS += set[6].varS ;
 
 
 
             // creem o functie de delay care nu blocheaza procesorul 
             static unsigned long delay_j3 ; 
-            if (millis() - delay_j3 >= intarziere )  
+            if (millis() - delay_j3 >= set[7].varS )  
             {
-                if (led_pos<(NUMPIXELS/2))
-                led_pos ++ ;
+                if (set[4].varS<(NUMPIXELS/2))
+                set[4].varS ++ ;
                 else 
-                led_pos = 0 ;
+                set[4].varS = 0 ;
 
                 delay_j3 = millis();
             }
              
 
 
-            two_circle (culoare, saturatie, lumina, led_pos, led_fill, NUMPIXELS, pix_cle); 
+            two_circle (set[1].varS, set[3].varS, set[2].varS, set[4].varS, set[5].varS, NUMPIXELS, set[9].varS); 
      
             NumeJoc = (char*)"Jocul 3" ; 
         break;
@@ -276,41 +313,41 @@ void jocuri (int select)
             {
                 //--------------------- 1   2   3   4   5   6   7   8    9    10 
                 set_setting_available (on, on, on, on, on, on, on, off, off ,on);
-                pix_cle = on ;
-                saturatie = 255;
-                intarziere = 50 ;
-                viteza = 50 ; 
-                led_pos = 0 ;
-                led_fill = 1 ;
+                set[9].varS = on ;
+                set[3].varS = 255;
+                set[7].varS = 50 ;
+                set[6].varS = 50 ; 
+                set[4].varS = 0 ;
+                set[5].varS = 1 ;
 
                 count=0 ; // inchidem while
                 break; // doar pentru siguranta
             }
 
             static int led_pos_j4  ;
-            culoare += viteza ;
+            set[1].varS += set[6].varS ;
             
             static unsigned long delay_j4 ; 
-            if (millis() - delay_j4 >= intarziere ) 
+            if (millis() - delay_j4 >= set[7].varS ) 
             {   
                 
-                if (led_fill >= NUMPIXELS / 2 )
+                if (set[5].varS >= NUMPIXELS / 2 )
                 {
-                    led_pos_j4 = led_pos ;
-                    led_fill= 1 ;
-                    culoare += 200;
+                    led_pos_j4 = set[4].varS ;
+                    set[5].varS= 1 ;
+                    set[1].varS += 200;
                 }
                 else
                 {
                     led_pos_j4 = lim_minus (led_pos_j4 , 1 , 0 , (NUMPIXELS/2)-1) ;
-                    led_fill +=2;
+                    set[5].varS +=2;
                 }
 
                 delay_j4 = millis();
             }
              
 
-            two_circle (culoare, saturatie, lumina, led_pos_j4, led_fill, NUMPIXELS, pix_cle); 
+            two_circle (set[1].varS, set[3].varS, set[2].varS, led_pos_j4, set[5].varS, NUMPIXELS, set[9].varS); 
      
             NumeJoc = (char*)"Jocul 4" ;
 
@@ -321,16 +358,16 @@ void jocuri (int select)
             {
                 //--------------------- 1   2   3   4   5   6   7   8    9    10 
                 set_setting_available (off, on, off, off, off, off, on, off, off ,off);
-                pix_cle = on ;
-                saturatie = 255;
-                intarziere = 100;
+                set[9].varS = on ;
+                set[3].varS = 255;
+                set[7].varS = 100;
                 count=0 ; // inchidem while
                 break; // doar pentru siguranta
             }
 
             static int x = 0 ;
             static unsigned long delay_j5 ; 
-            if (millis() - delay_j5 >= intarziere )  
+            if (millis() - delay_j5 >= set[7].varS )  
             {
                 if(x<12)
                 x++;
@@ -339,7 +376,7 @@ void jocuri (int select)
 
                 delay_j5 = millis();
             }
-            two_circle (CULORI[x], saturatie, lumina, 0 , NUMPIXELS/2, NUMPIXELS, pix_cle); 
+            two_circle (CULORI[x], set[3].varS, set[2].varS, 0 , NUMPIXELS/2, NUMPIXELS, set[9].varS); 
      
             NumeJoc = (char*)"Jocul 5" ;
         break;
@@ -349,8 +386,8 @@ void jocuri (int select)
             {
                 //--------------------- 1   2   3   4   5   6   7   8    9    10 
                 set_setting_available (off, on, off, off, off, off, on, off, off ,off);
-                saturatie = 255;
-                intarziere=1;
+                set[3].varS = 255;
+                set[7].varS=1;
 
                 count=0 ; // inchidem while
                 break; // doar pentru siguranta
@@ -358,31 +395,31 @@ void jocuri (int select)
 
             static uint16_t led_pos_j6 = 0 ; 
             static unsigned long delay_j6 ; 
-            if (millis() - delay_j6 >= intarziere )  
+            if (millis() - delay_j6 >= set[7].varS )  
             {   
-                if (led_pos < (NUMPIXELS/2)-1)
+                if (set[4].varS < (NUMPIXELS/2)-1)
                 {
-                    led_pos ++ ;
+                    set[4].varS ++ ;
                 }
                 else
                 {
-                    led_pos=0;
+                    set[4].varS=0;
                 }
-                if(led_pos< NUMPIXELS/4)
+                if(set[4].varS< NUMPIXELS/4)
                 {
-                    led_pos_j6 = led_pos+NUMPIXELS/4 ;
+                    led_pos_j6 = set[4].varS+NUMPIXELS/4 ;
                 }
                 else
                 {
-                    led_pos_j6 = led_pos-NUMPIXELS/4 ;
+                    led_pos_j6 = set[4].varS-NUMPIXELS/4 ;
                 }
 
 
                 delay_j6 = millis();
             }
 
-            two_circle (ROSU, saturatie, lumina, led_pos, NUMPIXELS/4,NUMPIXELS ,off); 
-            two_circle (ALBASTRU, saturatie, lumina, led_pos_j6, NUMPIXELS/4,NUMPIXELS ,off); 
+            two_circle (ROSU, set[3].varS, set[2].varS, set[4].varS, NUMPIXELS/4,NUMPIXELS ,off); 
+            two_circle (ALBASTRU, set[3].varS, set[2].varS, led_pos_j6, NUMPIXELS/4,NUMPIXELS ,off); 
 
             NumeJoc = (char*)"POLICE" ;
         break;
@@ -392,8 +429,8 @@ void jocuri (int select)
             {
                //--------------------- 1   2   3   4   5   6   7   8    9    10 
                 set_setting_available (off, on, off, off, off, off, on, off, off ,off);
-                saturatie = 255;
-                intarziere = 40 ;
+                set[3].varS = 255;
+                set[7].varS = 40 ;
                 count=0 ; // inchidem while
                 break; // doar pentru siguranta
             }
@@ -401,7 +438,7 @@ void jocuri (int select)
             static uint8_t count_j7 ;
 
             static unsigned long delay_j7 ; 
-            if (millis() - delay_j7 >= intarziere )  
+            if (millis() - delay_j7 >= set[7].varS )  
             {   
                 count_j7 ++ ;
                 delay_j7 = millis();
@@ -409,14 +446,14 @@ void jocuri (int select)
                 
             if ((count_j7 >= 0 && count_j7 <= 1 ) || ( count_j7 >= 4 && count_j7 <= 5 ))
             {
-                two_circle (ROSU, saturatie, lumina, 0, NUMPIXELS/4,NUMPIXELS ,off); 
-                two_circle (ALBASTRU, saturatie, lumina, NUMPIXELS/4, NUMPIXELS/4,NUMPIXELS ,off);
+                two_circle (ROSU, set[3].varS, set[2].varS, 0, NUMPIXELS/4,NUMPIXELS ,off); 
+                two_circle (ALBASTRU, set[3].varS, set[2].varS, NUMPIXELS/4, NUMPIXELS/4,NUMPIXELS ,off);
 
             }         
             else if (count_j7 >= 8 && count_j7 <= 9 )
             {
-                two_circle (ALBASTRU, saturatie, lumina, 0, NUMPIXELS/4,NUMPIXELS ,off); 
-                two_circle (ROSU, saturatie, lumina, NUMPIXELS/4, NUMPIXELS/4,NUMPIXELS ,off);
+                two_circle (ALBASTRU, set[3].varS, set[2].varS, 0, NUMPIXELS/4,NUMPIXELS ,off); 
+                two_circle (ROSU, set[3].varS, set[2].varS, NUMPIXELS/4, NUMPIXELS/4,NUMPIXELS ,off);
 
             }
             else if (count_j7 >= 11)
@@ -441,8 +478,8 @@ void jocuri (int select)
             {
                 //--------------------- 1   2   3   4   5   6   7   8    9    10
                 set_setting_available (off, on, off, off, on, off, on, off, off ,off);
-                led_fill = NUMPIXELS/4 ;
-                intarziere= 50;
+                set[5].varS = NUMPIXELS/4 ;
+                set[7].varS= 50;
 
                 count=0 ; // inchidem while
                 break; // doar pentru siguranta
@@ -454,7 +491,7 @@ void jocuri (int select)
             static int led_pos2_j8 = NUMPIXELS-1;
 
             static unsigned long delay_j8 ; 
-            if (millis() - delay_j8 >= intarziere )  
+            if (millis() - delay_j8 >= set[7].varS )  
             {   
                 if(led_pos_j8<(NUMPIXELS/2)-1)
                 {
@@ -481,8 +518,8 @@ void jocuri (int select)
             }  
 
             pixels.clear();
-            pixels.fill( pixels.ColorHSV(culoare_j8 , 255 , lumina ) , led_pos_j8 , led_fill);
-            pixels.fill( pixels.ColorHSV(culoare2_j8 , 255 , lumina ) , led_pos2_j8 , led_fill);
+            pixels.fill( pixels.ColorHSV(culoare_j8 , 255 , set[2].varS ) , led_pos_j8 , set[5].varS);
+            pixels.fill( pixels.ColorHSV(culoare2_j8 , 255 , set[2].varS ) , led_pos2_j8 , set[5].varS);
             pixels.show();
 
 
@@ -494,9 +531,9 @@ void jocuri (int select)
             {
                 //--------------------- 1   2   3   4   5   6   7   8    9    10
                 set_setting_available (off, on, off, off, on, off, on, off, off ,on);
-                intarziere = 50 ;
-                led_fill=50;
-                pix_cle = on ; 
+                set[7].varS = 50 ;
+                set[5].varS=50;
+                set[9].varS = on ; 
 
                 count=0 ; // inchidem while
                 break; // doar pentru siguranta
@@ -508,20 +545,20 @@ void jocuri (int select)
             static int led_fill_j9 =1 ;
 
             static unsigned long delay_j9 ; 
-            if (millis() - delay_j9 >= intarziere )  
+            if (millis() - delay_j9 >= set[7].varS )  
             {
                 culoare_j9 = random();
                 led_pos_j9 = random (0,NUMPIXELS-1);
-                led_fill_j9 = random (1,led_fill);
+                led_fill_j9 = random (1,set[5].varS);
 
                 delay_j9 = millis();
             }
-            if(pix_cle)
+            if(set[9].varS)
             {
                 pixels.clear();
             }
 
-            pixels.fill( pixels.ColorHSV(culoare_j9 , 255 , lumina ) , led_pos_j9 , led_fill_j9);
+            pixels.fill( pixels.ColorHSV(culoare_j9 , 255 , set[2].varS ) , led_pos_j9 , led_fill_j9);
             pixels.show();
 
 
@@ -543,17 +580,17 @@ void jocuri (int select)
                 //--------------------- 1   2   3   4   5   6   7   8    9    10
                 set_setting_available (off, on, off, off, on, off, on, off, off ,on);
 
-                pix_cle = on ;
-                saturatie = 255;
-                led_fill= 4;
+                set[9].varS = on ;
+                set[3].varS = 255;
+                set[5].varS= 4;
                 culoare_j10 = random();
                 culoare2_j10 = random ();
                 led_pos_j10 = 0 ;
                 led_pos2_j10 = 10 ;
                 count_j10 = 1 ;
-                intarziere=30;
-                intarziere_j10 = random(1,intarziere);
-                intarziere2_j10 = random(1,intarziere);
+                set[7].varS=30;
+                intarziere_j10 = random(1,set[7].varS);
+                intarziere2_j10 = random(1,set[7].varS);
     
                 count=0 ; // inchidem while
                 break; // doar pentru siguranta
@@ -606,21 +643,21 @@ void jocuri (int select)
                 count_j10 = 0 ;
                 culoare_j10 = random();
                 culoare2_j10 = random ();
-                intarziere_j10 = random(1,intarziere);
-                intarziere2_j10 = random(1,intarziere);
+                intarziere_j10 = random(1,set[7].varS);
+                intarziere2_j10 = random(1,set[7].varS);
             }
             else if (count_j10 == 0 && led_pos_j10 -1 == led_pos2_j10 )
             {
                 count_j10 = 1 ;
                 culoare_j10 = random();
                 culoare2_j10 = random ();
-                intarziere_j10 = random(1,intarziere);
-                intarziere2_j10 = random(1,intarziere);
+                intarziere_j10 = random(1,set[7].varS);
+                intarziere2_j10 = random(1,set[7].varS);
             }
 
-            two_circle (culoare_j10, saturatie, lumina, led_pos_j10, led_fill, NUMPIXELS, off);
-            two_circle (culoare2_j10, saturatie, lumina, led_pos2_j10, led_fill, NUMPIXELS, off);
-            if(pix_cle)
+            two_circle (culoare_j10, set[3].varS, set[2].varS, led_pos_j10, set[5].varS, NUMPIXELS, off);
+            two_circle (culoare2_j10, set[3].varS, set[2].varS, led_pos2_j10, set[5].varS, NUMPIXELS, off);
+            if(set[9].varS)
                 pixels.clear () ;
 
             NumeJoc = (char*)"Jocul 10" ;
@@ -635,526 +672,30 @@ void jocuri (int select)
             lcd.print("eroare") ;
         break;
     }            
-    
-  
-}
-
-//####################################################################################################################################
-//####################################################################################################################################
-//####################################################################################################################################
-//####################################################################################################################################
-
-
-
-  
-int meniu (void)
+}    
+void initializare (void)
 {
-
-     // creem o functie de delay care nu blocheaza procesorul 
-    static unsigned long delay_meniu ; 
-
-    if (millis() - delay_meniu >= 100 )
-    {
-        lcd.clear();
-        
-        delay_meniu = millis();
-    }
-
-      
-    static int last_sel_settings ;
-    last_sel_settings = sel_settings ;
-  
-    if ( var_taste == 3 ) 
-    {
-        if (sel_settings  < nr_optiuni_disponibile-1)
-        {
-            sel_settings  ++ ;
-
-            while (op_disp [sel_settings ] == off )
-            {
-                sel_settings  ++ ;
-
-                if (sel_settings == nr_optiuni_disponibile-1 && op_disp [sel_settings ] == off) 
-                {
-                    sel_settings = last_sel_settings ;
-                    break ;
-                }
-            }         
-
-        }
-    }
-      
-    else if (var_taste == 2)
-    {
-        if(sel_settings  >0 ) 
-        {
-            sel_settings  -- ;
-           
-            while (op_disp [sel_settings ] == off )
-            {
-                sel_settings  -- ;
-                if (sel_settings == 0 && op_disp [sel_settings ] == off) 
-                {
-                    sel_settings = last_sel_settings ;
-                    break ;
-                }
-            }
-        }
-       
-    } 
-    
-    
-    switch (sel_settings) 
-    {
- 
-        case 0 :
-    
-            lcd.setCursor (0, 0);
-            if (jocPos !=0 )
-            {
-                lcd.print(text_joc[lb_sel]);
-            }
-
-            lcd.print (NumeJoc);
-
-            // citire taste   
-            if (var_taste == 1) 
-            {
-                if(jocPos<nrJocuri)
-                {
-                    jocPos++ ; // in cazul in care nu depasim nr de jocuri , trecem la urmatorul
-                    count = 1 ; 
-                }
-            }
-            else if (var_taste == 4)
-            {
-                if (jocPos>0)
-                {
-                    jocPos-- ;
-                    count = 1 ;
-                }
-            } 
-          
-        break;
-
-   
-        case 1 :
-        
-            lcd.setCursor (0, 0);
-            lcd.print(text_culoare[lb_sel]);
-            lcd.print (culoare) ;
-            lcd.setCursor (10,1);
-            lcd.print("+");
-            lcd.print (multiplu);
-        
-            if (var_taste == 1) 
-            {
-                culoare += multiplu ; 
-            }
-
-            else if (var_taste == 4)
-            {
-                culoare -= multiplu ;
-            }
-
-            else if (var_taste == 5)
-            {
-                if (multiplu<10000)
-                {
-                    multiplu *= 10 ; 
-                }
-
-                else 
-                {
-                    multiplu = 1 ;
-                }
-            }
-        
-        break;
-
-
-        case 2 :
-            lcd.setCursor (0, 0);
-            lcd.print(text_stral[lb_sel]) ;
-            lcd.print(lumina) ;
-            lcd.setCursor (10,1);
-            lcd.print("+");
-            lcd.print (multiplu);
-
-            if (var_taste == 1) 
-            {
-                if(lumina+multiplu <= 255)
-                {
-                    lumina += multiplu ; // in cazul in care nu depasim val maxima a culori  , ridicam valoarea 
-                }
-
-                else                     
-                {
-                    lcd.setCursor(0,1);
-                    lcd.print (text_dep[lb_sel]);
-                }
-            }
-
-            else if (var_taste == 4)
-            {
-                if (lumina-multiplu >= 0 && lumina-multiplu < 255) // in cazul in care nu depasim val minima a culori  , scadem valoarea 
-                {
-                    lumina -= multiplu ;
-                }
-
-                else
-                {
-                lcd.setCursor(0,1);
-                lcd.print (text_dep[lb_sel]);
-                }
-            
-            }
-
-            else if (var_taste == 5)
-            {
-                if (multiplu<100)
-                {
-                    multiplu *= 10 ; 
-                }
-
-                else 
-                {
-                    multiplu = 1 ;
-                }
-            }
-        
-        break;
-
-
-        case 3 :
-            lcd.setCursor (0, 0);
-            lcd.print(text_sat[lb_sel]) ;
-            lcd.print(saturatie) ;  
-            lcd.setCursor (10,1);
-            lcd.print("+");
-            lcd.print (multiplu);
-        
-            
-            if (var_taste == 1) 
-            {
-                if(saturatie+multiplu <= 255)
-                {
-                    saturatie += multiplu ; // in cazul in care nu depasim val maxima a culori  , ridicam valoarea 
-                }
-
-                else                     
-                {
-                    lcd.setCursor(0,1);
-                    lcd.print (text_dep[lb_sel]);
-                }
-            }
-
-            else if (var_taste == 4)
-            {
-                if (saturatie - multiplu >= 0 && saturatie-multiplu < 255) // in cazul in care nu depasim val minima a culori  , scadem valoarea 
-                {
-                    saturatie -= multiplu ;
-                }
-
-                else
-                {
-                    lcd.setCursor(0,1);
-                    lcd.print (text_dep[lb_sel]);
-                }
-            
-            }
-
-            else if (var_taste == 5)
-            {
-                if (multiplu<100)
-                {
-                    multiplu *= 10 ; 
-                }
-
-                else 
-                {
-                    multiplu = 1 ;
-                }
-            }
-
-        break;
-
-
-        case 4 :
-            lcd.setCursor (0, 0);
-            lcd.print(text_poz[lb_sel]) ;
-            lcd.print(led_pos) ;
-            lcd.setCursor (10,1);
-            lcd.print("+");
-            lcd.print (multiplu);
-
-                
-                
-            if (var_taste == 1) 
-            {
-                if(led_pos+multiplu <= 53)
-                {
-                    led_pos += multiplu ; // in cazul in care nu depasim val maxima a culori  , ridicam valoarea 
-                }
-
-                else                     
-                {
-                    led_pos =led_pos - 54 + multiplu ; 
-                }
-            }
-
-            else if (var_taste == 4)
-            {
-                if(led_pos-multiplu >= 0 && led_pos-multiplu < NUMPIXELS/2) // in cazul in care nu depasim val minima a culori  , scadem valoarea 
-                {
-                    led_pos -= multiplu ;
-                }
-
-                else
-                {
-                    led_pos =led_pos + 54 - multiplu ; 
-                }
-                
-            }
-
-            else if(var_taste == 5)
-            {
-                if (multiplu<10)
-                {
-                    multiplu *= 10 ; 
-                }
-                else 
-                {
-                    multiplu = 1 ;
-                }
-            }
-
-        break;
-        
-  
-        case 5 :
-            lcd.setCursor (0, 0);
-            lcd.print(text_umple[lb_sel]) ;
-            lcd.print(led_fill) ;
-            lcd.setCursor (10,1);
-            lcd.print("+");
-            lcd.print (multiplu);
-
-                
-            if (var_taste == 1) 
-            {
-                if(led_fill+multiplu <= 54)
-                {
-                    led_fill += multiplu ; // in cazul in care nu depasim val maxima a culori  , ridicam valoarea 
-                }
-
-                else                     
-                {
-                    lcd.setCursor(0,1);
-                    lcd.print (text_dep[lb_sel]);
-                }
-
-            }
-
-            else if (var_taste == 4)
-            {
-                if (led_fill-multiplu > 0 && led_fill-multiplu < NUMPIXELS/2) // in cazul in care nu depasim val minima a culori  , scadem valoarea 
-                {
-                    led_fill -= multiplu ;
-                }
-
-                else
-                {
-                    lcd.setCursor(0,1);
-                    lcd.print (text_dep[lb_sel]);
-                }
-                
-            }
-
-            else if(var_taste == 5)
-            {
-                if(multiplu<10)
-                {
-                    multiplu *= 10 ; 
-                }
-
-                else 
-                {
-                    multiplu = 1 ;
-                }
-                
-            }
-
-        break ;
-
-        
-        case 6 :
-            lcd.setCursor (0, 0);
-            lcd.print(text_viteza[lb_sel]) ;
-            lcd.print(viteza) ;
-            lcd.setCursor (10,1);
-            lcd.print("+");
-            lcd.print (multiplu);
-
-            if (var_taste == 1) 
-            {
-                viteza += multiplu ; 
-            }
-            else if (var_taste == 4)
-            {
-                viteza -= multiplu ;
-            }
-
-            else if (var_taste == 5)
-            {
-                if (multiplu<10000)
-                {
-                    multiplu *= 10 ; 
-                }
-
-                else 
-                {
-                    multiplu = 1 ;
-                }
-
-            }
-
-        break ;
-
-
-        case 7 :
-            lcd.setCursor (0, 0);
-            lcd.print(text_inatzie[lb_sel]) ;
-            lcd.print(intarziere) ;
-            lcd.setCursor (10,1);
-            lcd.print("+");
-            lcd.print (multiplu);
-
-                
-            if (var_taste == 1) 
-            {
-                    intarziere += multiplu ; // in cazul in care nu depasim val maxima a culori  , ridicam valoarea 
-            }
-            else if (var_taste == 4)
-            {
-                    intarziere -= multiplu ;
-            }
-            else if (var_taste == 5)
-            {
-                if (multiplu<10000)
-                {
-                    multiplu *= 10 ; 
-                }
-
-                else 
-                {
-                    multiplu = 1 ;
-                }
-
-            }
-
-        break ;
-
-
-        case 8 :
-            lcd.setCursor (0, 0);
-            lcd.print(text_lb[lb_sel] ) ;
-            lcd.setCursor (0,1);
-            lcd.print(text_Nume_lb[lb_sel] ) ;
-
-                
-            if (var_taste == 1 && lb_sel < 1) 
-            {
-                lb_sel ++ ;
-            }
-            
-            else if (var_taste == 4 && lb_sel > 0)
-            {
-                lb_sel -- ;
-            }
-
-        break ;
-    
-
-        case 9 :
-            static int var_about ;
-
-            if (var_taste == 1 && var_about < 3) 
-            {
-                var_about ++ ; 
-            }
-
-            else if (var_taste == 4 && var_about > 0 )
-            {
-                var_about -- ;
-            }
-        
-            lcd.setCursor (0, 0);
-
-            if(var_about == 1 )
-                lcd.print(text_ultima_m_i[lb_sel]);
-
-            else if (var_about == 2 )
-                lcd.print(text_ultima_m_l[lb_sel]);
-
-            else if (var_about == 3 )
-                lcd.print(text_vers_curenta[lb_sel]);
-
-            else           
-                lcd.print(text_despre[lb_sel]) ; 
-
-            lcd.setCursor (0,1);
-
-            if(var_about == 1 )
-                lcd.print(__DATE__);    
-            else if (var_about == 2 )
-                lcd.print(__TIME__);
-            else if (var_about == 3)
-                lcd.print(text_nr_vers[lb_sel]);
-            else           
-                lcd.print(text_apasa[lb_sel]) ;
-
-
-        break ;
-
-
-        case 10 :
-
-            lcd.setCursor (0, 0);
-            lcd.print(text_px_cl[lb_sel] ) ;
-            if(pix_cle)
-            {
-                lcd.print(":ON");
-            }
-            else
-            {
-                lcd.print(":OFF");
-            }
-
-                
-            if (var_taste == 1 && pix_cle < 1) 
-            {
-                pix_cle = 1 ;
-            }
-            
-            else if (var_taste == 4 && pix_cle > 0)
-            {
-                pix_cle = 0 ;
-            }
-
-        break;
-        
-
-    
-        default :
-            lcd.clear();
-            lcd.setCursor (0, 0);
-            lcd.print("eroare") ;
-        break;
-
-    }
- 
-    return 0 ; 
-
+//          nume romana , nume englezea , varS, min , max , multiplu  , text2  
+set [0] ={(char*)"Joc:",(char*)"Game:", 1, 0, nrJocuri, 1};
+set [1] ={(char*)"Culoare:",(char*)"Collor:", 0, 0, 65536, 10000};
+set [2] ={(char*)"Stralucire:",(char*)"Brightnes:", 0, 0, 255, 100};
+set [3] ={(char*)"Saturatie:",(char*)"Saturation", 0, 0, 255, 100};
+set [4] ={(char*)"Pozitie:",(char*)"Position", 0, 0, NUMPIXELS/2, 10};
+set [5] ={(char*)"Umplere:",(char*)"Fill:", 0, 0, NUMPIXELS/2, 10}; 
+set [6] ={(char*)"Viteza:",(char*)"Speed:", 0, 0, 255, 1000};
+set [7] ={(char*)"Intarziere:",(char*)"Delay:", 0, 0, 255, 1000};
+set [8] ={(char*)"Limba:Romana    ",(char*)"Language:English", 0, 0, 1, 1 };
+set [9] ={(char*)"Curatare led: ",(char*)"Pixel clear: ", 0, 0, 1, 1};
+/*
+set[10] ={(char*)"",(char*)"", 0, 0, 255, 1000};
+set[11] ={(char*)"",(char*)"", 0, 0, 255, 1000};
+set[12] ={(char*)"",(char*)"", 0, 0, 255, 1000};
+set[13] ={(char*)"",(char*)"", 0, 0, 255, 1000};
+set[14] ={(char*)"",(char*)"", 0, 0, 255, 1000};
+set[15] ={(char*)"",(char*)"", 0, 0, 255, 1000}; 
+set[16] ={(char*)"",(char*)"", 0, 0, 255, 1000};
+set[17] ={(char*)"",(char*)"", 0, 0, 255, 1000};
+set[18] ={(char*)"",(char*)"", 0, 0, 255, 1000};
+set[19] ={(char*)"",(char*)"", 0, 0, 255, 1000};
+*/
 }
-

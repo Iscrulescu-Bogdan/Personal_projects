@@ -154,7 +154,7 @@ void serail_usb (void)
     }
 
 }
-
+/*
 void set_var (char* set , int val)
 {
     if (strncmp(set , "cul",3) == 0 )
@@ -203,23 +203,79 @@ void set_var (char* set , int val)
     }
 
 }
+*/
 
-void afisareDisplay (const char *text, int var = -1, int multiplicare=0)
+void control (int comanda ,int &setare_c , int nr_setari, uint32_t &var_c , uint32_t  max_var , int &multiplu_c, int multiplu_max)
 {
-    lcd.clear();
-    
-    lcd.setCursor (0, 0);
-    lcd.print(text);
+    if (multiplu_c > multiplu_max) multiplu_c = multiplu_max ;
 
-    if (var >= 0)
+    if (comanda == 1 ) // tasta adreapta
     {
-        lcd.print (var) ;
+        if(var_c + multiplu_c <= max_var )
+            var_c += multiplu_c ;
+        else
+            var_c = var_c + multiplu_c - max_var; 
     }
 
-    if(multiplicare)
+    else if (comanda == 2) //tasta sus 
+    {
+        if(setare_c - 1 >= 0)
+            setare_c -- ;
+        else
+            setare_c = nr_setari;
+    }
+
+    else if (comanda == 3) //tasta jos
+    {
+        if(setare_c + 1 <= nr_setari)
+            setare_c ++ ;
+        else
+            setare_c = 0 ;
+    }
+    else if (comanda == 4) // tasta stanga 
+    {
+        if(var_c- multiplu_c >= 0)
+            var_c -= multiplu_c ;
+        else
+            var_c = max_var - var_c - multiplu_c ;
+    }
+    
+
+    else if (comanda == 5) // tasta select
+    {
+        if (multiplu_c < multiplu_max)
+        {
+            multiplu_c *= 10 ; 
+        }
+
+        else 
+        {
+            multiplu_c = 1 ;
+        }
+    }    
+
+}
+
+void afisareDisplay ( char *text_a, uint32_t var_a, int multiplu_a ,int txt2, char *text2_a )
+{
+    //lcd.clear();
+
+    lcd.setCursor (0, 0);
+    lcd.print(text_a);
+
+    if (txt2)
+    {
+        lcd.print (var_a) ;
+    }
+    else 
+    {
+        lcd.print(text2_a);
+    }
+
+    if(multiplu_a)
     {
         lcd.setCursor (10,1);
         lcd.print("+");
-        lcd.print (multiplicare);
+        lcd.print (multiplu_a);
     }
 }
